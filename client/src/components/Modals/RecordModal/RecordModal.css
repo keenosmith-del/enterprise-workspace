@@ -1,0 +1,26 @@
+.recordModalOverlay {
+
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0, 0, 0, .45);
+
+    z-index: 999;
+
+}
+
+.recordModal {
+
+    width: 520px;
+
+    padding: 32px;
+
+    border-radius: 28px;
+
+    background: #111;
+
+}

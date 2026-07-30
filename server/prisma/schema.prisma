@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Supplier {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String?
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  sku         String    @unique
+  price       Decimal   @db.Decimal(10, 2)
+  stock       Int       @default(0)
+
+  categoryId  Int
+  supplierId  Int
+
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([supplierId])
+}
+
+model WorkspaceTable {
+
+  id        Int               @id @default(autoincrement())
+  name      String            @unique
+
+  columns   WorkspaceColumn[]
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+}
+
+model WorkspaceColumn {
+
+  id        Int             @id @default(autoincrement())
+
+  name      String
+
+  position  Int
+
+  tableId   Int
+  table     WorkspaceTable  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+}

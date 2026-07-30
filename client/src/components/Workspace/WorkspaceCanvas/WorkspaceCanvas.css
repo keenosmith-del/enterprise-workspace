@@ -1,0 +1,25 @@
+.workspaceCanvas {
+
+    position: absolute;
+
+    top: 90px;
+    left: 24px;
+    right: 24px;
+    bottom: 122px;
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 460px);
+
+    grid-auto-rows: 300px;
+
+    gap: 20px;
+
+    justify-content: start;
+    align-content: start;
+
+    overflow-y: auto;
+
+    z-index: 1;
+
+}

@@ -1,0 +1,400 @@
+.expandedTable {
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 28px;
+
+    background: rgba(255, 255, 255, 0);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border: 1px solid rgba(255, 255, 255, .08);
+
+}
+
+.expandedTableHeader {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 64px;
+
+    padding: 0 26px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+
+}
+
+.expandedTableHeaderActions {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+
+.expandedTableSearchBar {
+
+    width: 280px;
+    height: 38px;
+
+    padding: 0 18px;
+
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, .06);
+
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+
+    color: white;
+    font-size: .85rem;
+
+    outline: none;
+
+    transition:
+        background .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+
+}
+
+.expandedTableSearchBar::placeholder {
+
+    color: rgba(255, 255, 255, .45);
+
+}
+
+.expandedTableSearchBar:hover {
+
+    background: rgba(255, 255, 255, .075);
+
+}
+
+.expandedTableSearchBar:focus {
+
+    background: rgba(255, 255, 255, .08);
+
+    border-color: rgba(255, 255, 255, .16);
+
+    box-shadow:
+        0 0 0 1px rgba(139, 93, 66, .18),
+        0 0 20px rgba(139, 93, 66, .08);
+
+}
+
+.expandedTableHeader h3 {
+
+    margin: 0;
+
+    color: white;
+
+    font-size: 1rem;
+
+    font-weight: 500;
+
+}
+
+.expandedTableHeaderButton {
+
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid rgba(255, 255, 255, .08);
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, .06);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background .25s ease,
+        border-color .25s ease,
+        transform .2s ease;
+
+}
+
+.expandedTableHeaderButton:hover {
+
+    background: rgba(255, 255, 255, .10);
+
+    border-color: rgba(255, 255, 255, .14);
+
+}
+
+.expandedTableHeaderButton:active {
+
+    transform: scale(.96);
+
+}
+
+.expandedTableElement {
+
+    flex: 1;
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: fixed;
+
+    min-height: 0;
+
+}
+
+.expandedTableElement thead tr {
+
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+
+}
+
+.expandedTableElement th {
+
+    padding: 18px 26px;
+
+    text-align: left;
+
+    color: rgba(255, 255, 255, .65);
+
+    font-size: .88rem;
+
+    font-weight: 400;
+
+}
+
+.expandedTableElement td {
+
+    padding: 12px 26px;
+
+    color: white;
+
+    font-size: .82rem;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+.expandedEmptyState {
+
+    height: 240px;
+
+    text-align: center;
+
+    color: rgba(255, 255, 255, .55);
+
+    line-height: 1.8;
+
+}
+
+.expandedTable tbody tr {
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease;
+
+}
+
+.expandedTable tbody tr:hover {
+
+    background: rgba(255, 255, 255, .05);
+
+}
+
+.selectedRow {
+
+    background: rgba(255, 255, 255, .12);
+
+}
+
+.activeTable {
+
+    border: 1px solid rgba(255, 255, 255, .22);
+
+}
+
+.expandedTableBody {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+}
+
+.expandedTableBody::-webkit-scrollbar {
+
+    width: 5px;
+
+}
+
+.expandedTableBody::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+.expandedTableBody::-webkit-scrollbar-thumb {
+
+    background: rgba(255, 255, 255, .18);
+
+    border-radius: 999px;
+
+}
+
+.expandedTableBody::-webkit-scrollbar-thumb:hover {
+
+    background: rgba(255, 255, 255, .28);
+
+}
+
+/* Firefox */
+
+.expandedTableBody {
+
+    scrollbar-width: thin;
+
+    scrollbar-color: rgba(255, 255, 255, .18) transparent;
+
+}
+
+.expandedTableInput {
+
+    width: 100%;
+
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    color: var(--off-white);
+
+    font: inherit;
+
+    padding: 0;
+    margin: 0;
+
+}
+
+.expandedTableActionBar {
+
+    height: 64px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+
+    padding: 0 18px;
+
+    border-top: 1px solid rgba(255, 255, 255, .08);
+
+    overflow: hidden;
+
+    transition:
+        height .28s ease,
+        opacity .22s ease,
+        transform .28s ease,
+        padding .28s ease,
+        border-color .28s ease;
+
+}
+
+.expandedTableActionBarVisible {
+
+    height: 64px;
+
+    padding: 0 18px;
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+    border-top-color: rgba(255, 255, 255, .08);
+
+}
+
+.expandedTableActionBarHidden {
+
+    height: 0;
+
+    padding: 0 18px;
+
+    opacity: 0;
+
+    transform: translateY(12px);
+
+    pointer-events: none;
+
+    border-top-color: transparent;
+
+}
+
+.expandedTableActionButton {
+
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid rgba(255, 255, 255, .08);
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, .06);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background .25s ease,
+        border-color .25s ease,
+        transform .2s ease;
+
+}
+
+.expandedTableActionButton:hover {
+
+    background: rgba(255, 255, 255, .10);
+
+    border-color: rgba(255, 255, 255, .14);
+
+}
+
+.expandedTableActionButton:active {
+
+    transform: scale(.96);
+
+}

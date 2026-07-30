@@ -1,0 +1,42 @@
+.iconButton {
+
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.06);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background .25s ease,
+        border-color .25s ease,
+        transform .2s ease;
+
+}
+
+.iconButton:hover {
+
+    background: rgba(255,255,255,.10);
+
+    border-color: rgba(255,255,255,.14);
+
+}
+
+.iconButton:active {
+
+    transform: scale(.96);
+
+}
