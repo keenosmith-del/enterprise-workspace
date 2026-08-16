@@ -11,17 +11,55 @@ function WorkspaceTable({
     onDoubleSelectRow,
     onRemove,
     onExpand,
-    expanded,
+    onDragStart,
+    dragging,
+    dragPreview,
+    placeholder,
+    visualIndex,
+    dragPosition,
 }) {
     return (
 
         <section
-            className={`workspaceTable ${active ? "activeTable" : ""}`}
+            className={`
+        workspaceTable
+        ${active ? "activeTable" : ""}
+        ${dragging ? "draggingTable" : ""}
+        ${placeholder ? "dragPlaceholder" : ""}
+    `}
+            style={{
+
+                gridColumn:
+                    visualIndex >= 0
+                        ? `${(visualIndex % 3) + 1}`
+                        : undefined,
+
+                gridRow:
+                    visualIndex >= 0
+                        ? `${Math.floor(
+                            visualIndex / 3
+                        ) + 1}`
+                        : undefined,
+
+                opacity:
+                    dragging && !dragPreview
+                        ? 0
+                        : 1,
+
+            }}
             onMouseDown={onActivate}
-            onDoubleClick={onExpand}
         >
 
-            <div className="workspaceTableHeader">
+            <div
+                className="workspaceTableHeader"
+                onPointerDown={(event) => {
+
+                    event.stopPropagation();
+
+                    onDragStart(event);
+
+                }}
+            >
 
                 <h3>{title}</h3>
 
@@ -33,7 +71,6 @@ function WorkspaceTable({
                         onRemove();
 
                     }}
-
                 >
                     ×
                 </button>
@@ -41,6 +78,7 @@ function WorkspaceTable({
             </div>
 
             <div className="workspaceTableBody">
+
                 <table className="workspaceTableElement">
 
                     <thead>

@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
 import Background from "../../components/Layout/Background";
 import Dock from "../../components/Layout/Dock/Dock";
@@ -91,6 +95,14 @@ function Workspace({ setLoggedIn }) {
 
     const [searchQuery, setSearchQuery] = useState("");
 
+    const workspaceCanvasRef = useRef(null);
+
+    const [dragState, setDragState] = useState(null);
+
+    const dragStateRef = useRef(null);
+
+    const dragFrameRef = useRef(null);
+
     const [toast, setToast] = useState({
 
         visible: false,
@@ -119,6 +131,318 @@ function Workspace({ setLoggedIn }) {
         );
 
     }
+
+    function getWorkspacePosition(clientX, clientY) {
+
+        const canvas = workspaceCanvasRef.current;
+
+        if (!canvas) return null;
+
+        const rect = canvas.getBoundingClientRect();
+
+        const columnWidth = 460;
+        const rowHeight = 300;
+        const gap = 20;
+
+        const relativeX =
+            clientX - rect.left;
+
+        const relativeY =
+            clientY -
+            rect.top +
+            canvas.scrollTop;
+
+        if (
+            relativeX < 0 ||
+            relativeY < 0
+        ) {
+            return null;
+        }
+
+        const column = Math.floor(
+            relativeX / (columnWidth + gap)
+        );
+
+        const row = Math.floor(
+            relativeY / (rowHeight + gap)
+        );
+
+        if (column < 0 || column > 2) {
+            return null;
+        }
+
+        if (row < 0) {
+            return null;
+        }
+
+        return (
+            row * 3 +
+            column
+        );
+
+    }
+
+
+    function handleTableDragStart(event, tableId) {
+
+        const canvas =
+            workspaceCanvasRef.current;
+
+        if (!canvas) return;
+
+        const tableElement =
+            event.currentTarget.closest(".workspaceTable");
+
+        if (!tableElement) return;
+
+        const tableRect =
+            tableElement.getBoundingClientRect();
+
+        const initialIndex =
+            activeTables.indexOf(tableId);
+
+        if (initialIndex === -1) return;
+
+        const state = {
+
+            tableId,
+
+            initialIndex,
+
+            currentIndex: initialIndex,
+
+            startX: event.clientX,
+            startY: event.clientY,
+
+            x: event.clientX,
+            y: event.clientY,
+
+            offsetX:
+                event.clientX -
+                tableRect.left,
+
+            offsetY:
+                event.clientY -
+                tableRect.top,
+
+            width:
+                tableRect.width,
+
+            height:
+                tableRect.height,
+
+            dragging: false,
+
+        };
+
+        dragStateRef.current = state;
+
+
+        function handlePointerMove(moveEvent) {
+
+            const current =
+                dragStateRef.current;
+
+            if (!current) return;
+
+            const deltaX =
+                moveEvent.clientX -
+                current.startX;
+
+            const deltaY =
+                moveEvent.clientY -
+                current.startY;
+
+            const distance =
+                Math.sqrt(
+                    deltaX * deltaX +
+                    deltaY * deltaY
+                );
+
+
+            if (
+                !current.dragging &&
+                distance < 6
+            ) {
+
+                return;
+
+            }
+
+
+            if (!current.dragging) {
+
+                current.dragging = true;
+
+                document.body.style.userSelect =
+                    "none";
+
+            }
+
+
+            current.x =
+                moveEvent.clientX;
+
+            current.y =
+                moveEvent.clientY;
+
+
+            const targetIndex =
+                getWorkspacePosition(
+                    moveEvent.clientX,
+                    moveEvent.clientY
+                );
+
+
+            if (targetIndex !== null) {
+
+                current.currentIndex =
+                    Math.min(
+                        targetIndex,
+                        activeTables.length - 1
+                    );
+
+            }
+
+
+            if (!dragFrameRef.current) {
+
+                dragFrameRef.current =
+                    requestAnimationFrame(() => {
+
+                        dragFrameRef.current = null;
+
+                        setDragState({
+                            ...current,
+                        });
+
+                    });
+
+            }
+
+        }
+
+
+        function handlePointerUp() {
+
+            const current =
+                dragStateRef.current;
+
+
+            window.removeEventListener(
+                "pointermove",
+                handlePointerMove
+            );
+
+            window.removeEventListener(
+                "pointerup",
+                handlePointerUp
+            );
+
+
+            document.body.style.userSelect =
+                "";
+
+
+            if (!current) return;
+
+
+            if (
+                current.dragging &&
+                current.currentIndex !==
+                current.initialIndex
+            ) {
+
+                setActiveTables(previous => {
+
+                    const next = [
+                        ...previous,
+                    ];
+
+                    const [
+                        movedTable,
+                    ] = next.splice(
+                        current.initialIndex,
+                        1
+                    );
+
+                    next.splice(
+                        current.currentIndex,
+                        0,
+                        movedTable
+                    );
+
+                    return next;
+
+                });
+
+            }
+
+
+            dragStateRef.current = null;
+
+            setDragState(null);
+
+        }
+
+
+        window.addEventListener(
+            "pointermove",
+            handlePointerMove
+        );
+
+        window.addEventListener(
+            "pointerup",
+            handlePointerUp
+        );
+
+    }
+
+
+    function cancelTableDrag() {
+
+        const current =
+            dragStateRef.current;
+
+        if (!current) return;
+
+        document.body.style.userSelect =
+            "";
+
+        dragStateRef.current = null;
+
+        setDragState(null);
+
+    }
+
+
+    useEffect(() => {
+
+        function handleKeyDown(event) {
+
+            if (event.key === "Escape") {
+
+                cancelTableDrag();
+
+            }
+
+        }
+
+        window.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "keydown",
+                handleKeyDown
+            );
+
+        };
+
+    }, []);
 
     async function loadWorkspace() {
 
@@ -283,6 +607,7 @@ function Workspace({ setLoggedIn }) {
             />
 
             <WorkspaceCanvas
+                ref={workspaceCanvasRef}
                 noSearchResults={noSearchResults}
             >
 
@@ -294,12 +619,73 @@ function Workspace({ setLoggedIn }) {
 
                     if (!table) return null;
 
+                    const tableIndex =
+                        activeTables.indexOf(table.id);
+
+                    const isDragging =
+                        dragState?.tableId === table.id &&
+                        dragState.dragging;
+
+                    const isDragActive =
+                        Boolean(dragState?.dragging);
+
+                    const draggedIndex =
+                        dragState?.initialIndex ?? -1;
+
+                    const targetIndex =
+                        dragState?.currentIndex ?? draggedIndex;
+
+                    let visualIndex =
+                        tableIndex;
+
+                    if (isDragActive) {
+
+                        if (tableIndex === draggedIndex) {
+
+                            visualIndex = -1;
+
+                        } else if (
+                            draggedIndex < targetIndex &&
+                            tableIndex > draggedIndex &&
+                            tableIndex <= targetIndex
+                        ) {
+
+                            visualIndex =
+                                tableIndex - 1;
+
+                        } else if (
+                            draggedIndex > targetIndex &&
+                            tableIndex < draggedIndex &&
+                            tableIndex >= targetIndex
+                        ) {
+
+                            visualIndex =
+                                tableIndex + 1;
+
+                        }
+
+                    }
+
+                    const isPlaceholder =
+                        isDragActive &&
+                        tableIndex === targetIndex;
+
                     return (
                         <WorkspaceTable
                             key={table.id}
                             title={table.title}
                             columns={table.columns || []}
                             rows={filteredTableData[table.id] || []}
+
+                            visualIndex={visualIndex}
+
+                            dragging={
+                                dragState?.tableId === table.id &&
+                                dragState.dragging
+                            }
+
+                            placeholder={isPlaceholder}
+
                             selectedRow={
                                 selectedRow?.table === table.id
                                     ? selectedRow.index
@@ -375,6 +761,12 @@ function Workspace({ setLoggedIn }) {
                                 setActiveTable(table.id);
 
                             }}
+                            onDragStart={(event) =>
+                                handleTableDragStart(
+                                    event,
+                                    table.id
+                                )
+                            }
                             onExpand={() => {
 
                                 setStartEditing(false);
@@ -383,12 +775,93 @@ function Workspace({ setLoggedIn }) {
                             }}
                             expanded
                             onClose={() => setExpandedTable(null)}
+
+                            dragPosition={
+                                isDragging
+                                    ? {
+                                        x: dragState.x,
+                                        y: dragState.y,
+                                        offsetX: dragState.offsetX,
+                                        offsetY: dragState.offsetY,
+                                        width: dragState.width,
+                                        height: dragState.height,
+                                    }
+                                    : null
+                            }
+
                         />
                     );
 
                 })}
 
             </WorkspaceCanvas>
+
+            {dragState?.dragging && (
+
+                <div
+                    className="workspaceDragPreview"
+                    style={{
+                        left:
+                            dragState.x -
+                            dragState.offsetX,
+
+                        top:
+                            dragState.y -
+                            dragState.offsetY,
+
+                        width:
+                            dragState.width,
+
+                        height:
+                            dragState.height,
+                    }}
+                >
+
+                    {(() => {
+
+                        const table =
+                            allTables.find(
+                                table =>
+                                    table.id ===
+                                    dragState.tableId
+                            );
+
+                        if (!table) return null;
+
+                        return (
+
+                            <WorkspaceTable
+                                title={table.title}
+                                columns={table.columns || []}
+                                rows={
+                                    filteredTableData[
+                                    table.id
+                                    ] || []
+                                }
+
+                                active={false}
+
+                                selectedRow={null}
+
+                                dragPreview
+
+                                placeholder={false}
+                                visualIndex={-1}
+
+                                onActivate={() => { }}
+                                onSelectRow={() => { }}
+                                onDoubleSelectRow={() => { }}
+                                onRemove={() => { }}
+                                onExpand={() => { }}
+                            />
+
+                        );
+
+                    })()}
+
+                </div>
+
+            )}
 
             <ExpandedTableModal
                 open={expandedTable !== null}

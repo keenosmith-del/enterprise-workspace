@@ -1,17 +1,22 @@
+import { forwardRef } from "react";
+
 import "./WorkspaceCanvas.css";
 
 import WorkspaceState from "../WorkspaceState/WorkspaceState";
 
-function WorkspaceCanvas({
+const WorkspaceCanvas = forwardRef(function WorkspaceCanvas({
 
     children,
     noSearchResults,
 
-}) {
+}, ref) {
 
     return (
 
-        <main className="workspaceCanvas">
+        <main
+            ref={ref}
+            className="workspaceCanvas"
+        >
 
             {children}
 
@@ -25,6 +30,6 @@ function WorkspaceCanvas({
 
     );
 
-}
+});
 
 export default WorkspaceCanvas;
