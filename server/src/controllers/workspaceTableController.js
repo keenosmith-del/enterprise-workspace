@@ -74,6 +74,133 @@ export const createWorkspaceTable = async (req, res) => {
                     : []
             );
 
+        for (const column of columns) {
+
+            if (!column.isForeignKey) {
+                continue;
+            }
+
+            const referencedTable =
+                await prisma.$queryRaw`
+
+            SELECT
+                table_name
+
+            FROM information_schema.tables
+
+            WHERE table_schema = 'public'
+
+            AND LOWER(table_name) =
+                LOWER(${column.foreignKeyTableName})
+
+            LIMIT 1;
+
+        `;
+
+            if (referencedTable.length === 0) {
+
+                throw new Error(
+                    `Referenced table "${column.foreignKeyTableName}" does not exist.`
+                );
+
+            }
+
+            const referencedColumn =
+                await prisma.$queryRaw`
+
+            SELECT
+                column_name,
+                data_type,
+                udt_name
+
+            FROM information_schema.columns
+
+            WHERE table_schema = 'public'
+
+            AND LOWER(table_name) =
+                LOWER(${column.foreignKeyTableName})
+
+            AND LOWER(column_name) =
+                LOWER(${column.foreignKeyColumnName})
+
+            LIMIT 1;
+
+        `;
+
+            if (referencedColumn.length === 0) {
+
+                throw new Error(
+                    `Referenced column "${column.foreignKeyColumnName}" does not exist in table "${column.foreignKeyTableName}".`
+                );
+
+            }
+
+            const referencedType =
+                referencedColumn[0];
+
+            const normalizeType = (dataType, udtName) => {
+
+                if (udtName === "int4") {
+                    return "INTEGER";
+                }
+
+                if (udtName === "int8") {
+                    return "BIGINT";
+                }
+
+                if (udtName === "varchar") {
+                    return "VARCHAR";
+                }
+
+                if (udtName === "text") {
+                    return "TEXT";
+                }
+
+                if (udtName === "numeric") {
+                    return "DECIMAL";
+                }
+
+                if (udtName === "bool") {
+                    return "BOOLEAN";
+                }
+
+                if (udtName === "date") {
+                    return "DATE";
+                }
+
+                if (
+                    udtName === "timestamp" ||
+                    udtName === "timestamptz"
+                ) {
+                    return "TIMESTAMP";
+                }
+
+                return dataType.toUpperCase();
+
+            };
+
+            const localType =
+                normalizeType(
+                    column.dataType,
+                    column.dataType.toLowerCase()
+                );
+
+            const foreignType =
+                normalizeType(
+                    referencedType.data_type,
+                    referencedType.udt_name
+                );
+
+            if (localType !== foreignType) {
+
+                throw new Error(
+                    `Foreign key column "${column.name}" has type ${localType}, but "${column.foreignKeyTableName}.${column.foreignKeyColumnName}" is ${foreignType}. Change the foreign key column data type to ${foreignType}.`
+                );
+
+            }
+
+        }
+
         const existingTable =
             await prisma.workspaceTable.findFirst({
 
@@ -206,6 +333,16 @@ export const createWorkspaceTable = async (req, res) => {
                                         column.defaultValue
                                             ?.trim() || null,
 
+                                    foreignKeyTableId:
+                                        column.foreignKeyTableId
+                                            ? Number(column.foreignKeyTableId)
+                                            : null,
+
+                                    foreignKeyColumnId:
+                                        column.foreignKeyColumnId
+                                            ? Number(column.foreignKeyColumnId)
+                                            : null,
+
                                 })
                             ),
 
@@ -270,6 +407,9 @@ export const createWorkspaceTable = async (req, res) => {
             ) ||
             error.message?.includes(
                 "must be a primary key"
+            ) ||
+            error.message?.includes(
+                "Foreign key column"
             )
         ) {
 
@@ -298,15 +438,26 @@ export const deleteWorkspaceTable = async (req, res) => {
 
         const id = Number(req.params.id);
 
-        const table = await prisma.workspaceTable.findUnique({
+        if (!Number.isInteger(id)) {
 
-            where: {
+            return res.status(400).json({
 
-                id,
+                message: "Invalid table ID.",
 
-            },
+            });
 
-        });
+        }
+
+        const table =
+            await prisma.workspaceTable.findUnique({
+
+                where: {
+
+                    id,
+
+                },
+
+            });
 
         if (!table) {
 
@@ -318,15 +469,74 @@ export const deleteWorkspaceTable = async (req, res) => {
 
         }
 
-        await prisma.workspaceTable.delete({
+        const protectedTables = [
 
-            where: {
+            "products",
+            "categories",
+            "suppliers",
 
-                id,
+        ];
 
-            },
+        if (
+            protectedTables.includes(
+                table.name.toLowerCase()
+            )
+        ) {
 
-        });
+            return res.status(403).json({
+
+                message:
+                    "This table is protected.",
+
+            });
+
+        }
+
+        await prisma.$transaction(
+            async (transaction) => {
+
+                const physicalTable =
+                    await transaction.$queryRaw`
+
+                        SELECT EXISTS (
+
+                            SELECT 1
+
+                            FROM information_schema.tables
+
+                            WHERE table_schema = 'public'
+
+                            AND LOWER(table_name) =
+                                LOWER(${table.name})
+
+                        ) AS "exists";
+
+                    `;
+
+                if (physicalTable[0]?.exists) {
+
+                    await transaction.$executeRawUnsafe(
+
+                        `DROP TABLE ${quoteIdentifier(
+                            table.name
+                        )} CASCADE`
+
+                    );
+
+                }
+
+                await transaction.workspaceTable.delete({
+
+                    where: {
+
+                        id,
+
+                    },
+
+                });
+
+            }
+        );
 
         res.status(200).json({
 
@@ -340,7 +550,8 @@ export const deleteWorkspaceTable = async (req, res) => {
 
         res.status(500).json({
 
-            message: "Failed to delete table.",
+            message:
+                "Failed to delete table.",
 
         });
 

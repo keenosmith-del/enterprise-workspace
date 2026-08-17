@@ -12,11 +12,13 @@ const DATA_TYPE_SQL = {
 
 const ALLOWED_DATA_TYPES = Object.keys(DATA_TYPE_SQL);
 
+
 export function quoteIdentifier(identifier) {
 
     return `"${identifier.replace(/"/g, '""')}"`;
 
 }
+
 
 export function validateTableName(name) {
 
@@ -45,6 +47,7 @@ export function validateTableName(name) {
     return trimmedName;
 
 }
+
 
 export function validateColumnDefinitions(columns) {
 
@@ -126,6 +129,20 @@ export function validateColumnDefinitions(columns) {
 
         }
 
+        if (
+            column.isForeignKey &&
+            (
+                !column.foreignKeyTableName ||
+                !column.foreignKeyColumnName
+            )
+        ) {
+
+            throw new Error(
+                `Foreign key column "${name}" must specify a referenced table and column.`
+            );
+
+        }
+
     }
 
     const primaryKeys = columns.filter(
@@ -143,6 +160,7 @@ export function validateColumnDefinitions(columns) {
     return columns;
 
 }
+
 
 function buildDefaultValue(column) {
 
@@ -207,6 +225,7 @@ function buildDefaultValue(column) {
 
 }
 
+
 export function buildCreateTableSQL(tableName, columns) {
 
     const columnDefinitions = columns.map(column => {
@@ -262,13 +281,36 @@ export function buildCreateTableSQL(tableName, columns) {
 
     });
 
+
+    const foreignKeyDefinitions = columns
+        .filter(column => column.isForeignKey)
+        .map(column => {
+
+            return `
+                FOREIGN KEY (${quoteIdentifier(column.name)})
+                REFERENCES ${quoteIdentifier(column.foreignKeyTableName)}
+                (${quoteIdentifier(column.foreignKeyColumnName)})
+            `;
+
+        });
+
+
+    const definitions = [
+
+        ...columnDefinitions,
+        ...foreignKeyDefinitions,
+
+    ];
+
+
     return `
         CREATE TABLE ${quoteIdentifier(tableName)} (
-            ${columnDefinitions.join(",\n            ")}
+            ${definitions.join(",\n            ")}
         );
     `;
 
 }
+
 
 export function validateSingleColumnDefinition(column) {
 

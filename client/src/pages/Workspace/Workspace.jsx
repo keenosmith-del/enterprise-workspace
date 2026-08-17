@@ -1026,6 +1026,7 @@ function Workspace({ setLoggedIn }) {
                 open={createTableOpen}
                 value={newTableName}
                 onChange={setNewTableName}
+                tables={allTables}
                 onCancel={() => {
 
                     setCreateTableOpen(false);

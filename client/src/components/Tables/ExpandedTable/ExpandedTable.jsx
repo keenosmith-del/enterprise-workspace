@@ -670,7 +670,7 @@ function ExpandedTable({
 
                     <tbody>
 
-                        {safeRows.length === 0 ? (
+                        {safeRows.length === 0 && !creatingRow ? (
 
                             <tr>
 

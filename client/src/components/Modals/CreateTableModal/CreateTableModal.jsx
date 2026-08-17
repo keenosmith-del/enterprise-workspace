@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "./CreateTableModal.css";
 
@@ -21,6 +21,8 @@ function CreateTableModal({
     onCancel,
     onCreate,
 
+    tables = [],
+
 }) {
 
     const [columns, setColumns] = useState([
@@ -32,8 +34,34 @@ function CreateTableModal({
             isNullable: false,
             isUnique: false,
             defaultValue: "",
+
+            isForeignKey: false,
+            foreignKeyTableId: "",
+            foreignKeyColumnId: "",
         },
     ]);
+
+    useEffect(() => {
+
+        if (!open) return;
+
+        setColumns([
+            {
+                name: "id",
+                dataType: "INTEGER",
+                isPrimaryKey: true,
+                isAutoIncrement: true,
+                isNullable: false,
+                isUnique: false,
+                defaultValue: "",
+
+                isForeignKey: false,
+                foreignKeyTableId: "",
+                foreignKeyColumnId: "",
+            },
+        ]);
+
+    }, [open]);
 
     if (!open) return null;
 
@@ -72,6 +100,10 @@ function CreateTableModal({
                 isNullable: true,
                 isUnique: false,
                 defaultValue: "",
+
+                isForeignKey: false,
+                foreignKeyTableId: "",
+                foreignKeyColumnId: "",
             },
 
         ]);
@@ -91,9 +123,94 @@ function CreateTableModal({
 
     }
 
+    function handleForeignKeyToggle(index, checked) {
+
+        updateColumn(
+            index,
+            "isForeignKey",
+            checked
+        );
+
+        if (!checked) {
+
+            updateColumn(
+                index,
+                "foreignKeyTableId",
+                ""
+            );
+
+            updateColumn(
+                index,
+                "foreignKeyColumnId",
+                ""
+            );
+
+        }
+
+    }
+
+    function getReferencedTable(tableId) {
+
+        return tables.find(
+            table =>
+                String(table.id) === String(tableId)
+        );
+
+    }
+
+    function handleForeignKeyTableChange(index, tableId) {
+
+        updateColumn(
+            index,
+            "foreignKeyTableId",
+            tableId
+        );
+
+        updateColumn(
+            index,
+            "foreignKeyColumnId",
+            ""
+        );
+
+    }
+
     function handleCreate() {
 
-        onCreate(columns);
+        const preparedColumns = columns.map(column => {
+
+            if (!column.isForeignKey) {
+
+                return column;
+
+            }
+
+            const referencedTable =
+                getReferencedTable(
+                    column.foreignKeyTableId
+                );
+
+            const referencedColumn =
+                referencedTable?.columnDefinitions?.find(
+                    referencedColumn =>
+                        String(referencedColumn.id) ===
+                        String(column.foreignKeyColumnId)
+                );
+
+            return {
+
+                ...column,
+
+                foreignKeyTableName:
+                    referencedTable?.title || "",
+
+                foreignKeyColumnName:
+                    referencedColumn?.name || "",
+
+            };
+
+        });
+
+        onCreate(preparedColumns);
 
     }
 
@@ -126,160 +243,288 @@ function CreateTableModal({
                         <span>Required</span>
                         <span>Unique</span>
                         <span>Default</span>
+                        <span>FK</span>
                         <span></span>
 
                     </div>
 
-                    {columns.map((column, index) => (
+                    {columns.map((column, index) => {
 
-                        <div
-                            className="createTableColumnRow"
-                            key={index}
-                        >
+                        const referencedTable =
+                            getReferencedTable(
+                                column.foreignKeyTableId
+                            );
 
-                            <input
-                                className="createTableColumnInput"
-                                placeholder="Column name"
-                                value={column.name}
-                                onChange={(event) =>
-                                    updateColumn(
-                                        index,
-                                        "name",
-                                        event.target.value
-                                    )
-                                }
-                            />
+                        const referencedColumns =
+                            referencedTable?.columnDefinitions ||
+                            [];
 
-                            <select
-                                className="createTableColumnInput"
-                                value={column.dataType}
-                                onChange={(event) => {
+                        return (
 
-                                    const dataType =
-                                        event.target.value;
+                            <div
+                                className="createTableColumnRow"
+                                key={index}
+                            >
 
-                                    updateColumn(
-                                        index,
-                                        "dataType",
-                                        dataType
-                                    );
+                                <input
+                                    className="createTableColumnInput"
+                                    placeholder="Column name"
+                                    value={column.name}
+                                    onChange={(event) =>
+                                        updateColumn(
+                                            index,
+                                            "name",
+                                            event.target.value
+                                        )
+                                    }
+                                />
 
-                                    if (dataType !== "INTEGER") {
+                                <select
+                                    className="createTableColumnInput"
+                                    value={column.dataType}
+                                    onChange={(event) => {
+
+                                        const dataType =
+                                            event.target.value;
 
                                         updateColumn(
                                             index,
-                                            "isAutoIncrement",
-                                            false
+                                            "dataType",
+                                            dataType
                                         );
 
+                                        if (
+                                            dataType !==
+                                            "INTEGER"
+                                        ) {
+
+                                            updateColumn(
+                                                index,
+                                                "isAutoIncrement",
+                                                false
+                                            );
+
+                                        }
+
+                                    }}
+                                >
+
+                                    {DATA_TYPES.map(type => (
+
+                                        <option
+                                            key={type}
+                                            value={type}
+                                        >
+                                            {type}
+                                        </option>
+
+                                    ))}
+
+                                </select>
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        column.isPrimaryKey
                                     }
+                                    onChange={(event) => {
 
-                                }}
-                            >
+                                        const isPrimaryKey =
+                                            event.target.checked;
 
-                                {DATA_TYPES.map(type => (
+                                        updateColumn(
+                                            index,
+                                            "isPrimaryKey",
+                                            isPrimaryKey
+                                        );
 
-                                    <option
-                                        key={type}
-                                        value={type}
+                                        if (!isPrimaryKey) {
+
+                                            updateColumn(
+                                                index,
+                                                "isAutoIncrement",
+                                                false
+                                            );
+
+                                        }
+
+                                    }}
+                                />
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        column.isAutoIncrement
+                                    }
+                                    disabled={
+                                        !column.isPrimaryKey ||
+                                        column.dataType !==
+                                        "INTEGER"
+                                    }
+                                    onChange={(event) =>
+                                        updateColumn(
+                                            index,
+                                            "isAutoIncrement",
+                                            event.target.checked
+                                        )
+                                    }
+                                />
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        !column.isNullable
+                                    }
+                                    onChange={(event) =>
+                                        updateColumn(
+                                            index,
+                                            "isNullable",
+                                            !event.target.checked
+                                        )
+                                    }
+                                />
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        column.isUnique
+                                    }
+                                    onChange={(event) =>
+                                        updateColumn(
+                                            index,
+                                            "isUnique",
+                                            event.target.checked
+                                        )
+                                    }
+                                />
+
+                                <input
+                                    className="createTableColumnInput"
+                                    placeholder="Default"
+                                    value={
+                                        column.defaultValue
+                                    }
+                                    onChange={(event) =>
+                                        updateColumn(
+                                            index,
+                                            "defaultValue",
+                                            event.target.value
+                                        )
+                                    }
+                                />
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        column.isForeignKey
+                                    }
+                                    onChange={(event) =>
+                                        handleForeignKeyToggle(
+                                            index,
+                                            event.target.checked
+                                        )
+                                    }
+                                />
+
+                                <button
+                                    className="createTableRemoveColumn"
+                                    onClick={() =>
+                                        removeColumn(index)
+                                    }
+                                    disabled={
+                                        columns.length === 1
+                                    }
+                                >
+                                    ×
+                                </button>
+
+                                {column.isForeignKey && (
+
+                                    <div
+                                        className="createTableForeignKeyControls"
                                     >
-                                        {type}
-                                    </option>
 
-                                ))}
+                                        <select
+                                            className="createTableColumnInput"
+                                            value={
+                                                column.foreignKeyTableId
+                                            }
+                                            onChange={(event) =>
+                                                handleForeignKeyTableChange(
+                                                    index,
+                                                    event.target.value
+                                                )
+                                            }
+                                        >
 
-                            </select>
+                                            <option value="">
+                                                Referenced table
+                                            </option>
 
-                            <input
-                                type="checkbox"
-                                checked={column.isPrimaryKey}
-                                onChange={(event) => {
+                                            {tables.map(table => (
 
-                                    const isPrimaryKey =
-                                        event.target.checked;
+                                                <option
+                                                    key={table.id}
+                                                    value={table.id}
+                                                >
+                                                    {table.title}
+                                                </option>
 
-                                    updateColumn(
-                                        index,
-                                        "isPrimaryKey",
-                                        isPrimaryKey
-                                    );
+                                            ))}
 
-                                    if (!isPrimaryKey) {
+                                        </select>
 
-                                        updateColumn(
-                                            index,
-                                            "isAutoIncrement",
-                                            false
-                                        );
+                                        <select
+                                            className="createTableColumnInput"
+                                            value={
+                                                column.foreignKeyColumnId
+                                            }
+                                            disabled={
+                                                !column.foreignKeyTableId
+                                            }
+                                            onChange={(event) =>
+                                                updateColumn(
+                                                    index,
+                                                    "foreignKeyColumnId",
+                                                    event.target.value
+                                                )
+                                            }
+                                        >
 
-                                    }
+                                            <option value="">
+                                                Referenced column
+                                            </option>
 
-                                }}
-                            />
+                                            {referencedColumns.map(
+                                                columnDefinition => (
 
-                            <input
-                                type="checkbox"
-                                checked={column.isAutoIncrement}
-                                disabled={!column.isPrimaryKey || column.dataType !== "INTEGER"}
-                                onChange={(event) =>
-                                    updateColumn(
-                                        index,
-                                        "isAutoIncrement",
-                                        event.target.checked
-                                    )
-                                }
-                            />
+                                                    <option
+                                                        key={
+                                                            columnDefinition.id
+                                                        }
+                                                        value={
+                                                            columnDefinition.id
+                                                        }
+                                                    >
+                                                        {
+                                                            columnDefinition.name
+                                                        }
+                                                    </option>
 
-                            <input
-                                type="checkbox"
-                                checked={!column.isNullable}
-                                onChange={(event) =>
-                                    updateColumn(
-                                        index,
-                                        "isNullable",
-                                        !event.target.checked
-                                    )
-                                }
-                            />
+                                                )
+                                            )}
 
-                            <input
-                                type="checkbox"
-                                checked={column.isUnique}
-                                onChange={(event) =>
-                                    updateColumn(
-                                        index,
-                                        "isUnique",
-                                        event.target.checked
-                                    )
-                                }
-                            />
+                                        </select>
 
-                            <input
-                                className="createTableColumnInput"
-                                placeholder="Default"
-                                value={column.defaultValue}
-                                onChange={(event) =>
-                                    updateColumn(
-                                        index,
-                                        "defaultValue",
-                                        event.target.value
-                                    )
-                                }
-                            />
+                                    </div>
 
-                            <button
-                                className="createTableRemoveColumn"
-                                onClick={() =>
-                                    removeColumn(index)
-                                }
-                                disabled={columns.length === 1}
-                            >
-                                ×
-                            </button>
+                                )}
 
-                        </div>
+                            </div>
 
-                    ))}
+                        );
+
+                    })}
 
                 </div>
 
