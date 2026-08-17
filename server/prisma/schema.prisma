@@ -59,16 +59,22 @@ model WorkspaceTable {
 
 model WorkspaceColumn {
 
-  id        Int             @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
 
-  name      String
+  name          String
+  dataType      String
+  position      Int
 
-  position  Int
+  isPrimaryKey  Boolean         @default(false)
+  isAutoIncrement Boolean         @default(false)
+  isNullable    Boolean         @default(true)
+  isUnique      Boolean         @default(false)
+  defaultValue  String?
 
-  tableId   Int
-  table     WorkspaceTable  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  tableId       Int
+  table         WorkspaceTable  @relation(fields: [tableId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
 }

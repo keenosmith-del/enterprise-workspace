@@ -20,6 +20,7 @@ import {
     getWorkspaceTables,
     updateWorkspaceTable,
     deleteWorkspaceTable,
+    getWorkspaceRecords,
 } from "../../api/workspaceTables";
 
 import RecordModal from "../../components/Modals/RecordModal/RecordModal";
@@ -39,6 +40,8 @@ function Workspace({ setLoggedIn }) {
     const [suppliers, setSuppliers] = useState([]);
 
     const [customTables, setCustomTables] = useState([]);
+
+    const [customRecords, setCustomRecords] = useState({});
 
     const [activeTables, setActiveTables] = useState(() => {
 
@@ -454,16 +457,48 @@ function Workspace({ setLoggedIn }) {
                 supplierData,
                 customTableData,
             ] = await Promise.all([
+
                 getProducts(),
                 getCategories(),
                 getSuppliers(),
                 getWorkspaceTables(),
+
             ]);
 
+            const customRecordEntries =
+                await Promise.all(
+
+                    customTableData.map(
+                        async (table) => {
+
+                            const records =
+                                await getWorkspaceRecords(
+                                    table.id
+                                );
+
+                            return [
+                                table.id,
+                                records,
+                            ];
+
+                        }
+                    )
+
+                );
+
             setProducts(productData);
+
             setCategories(categoryData);
+
             setSuppliers(supplierData);
+
             setCustomTables(customTableData);
+
+            setCustomRecords(
+                Object.fromEntries(
+                    customRecordEntries
+                )
+            );
 
         } catch (error) {
 
@@ -495,8 +530,15 @@ function Workspace({ setLoggedIn }) {
         ...customTables.map((table) => ({
 
             id: `custom-${table.id}`,
+
             title: table.name,
-            columns: [],
+
+            columns: (table.columns || [])
+                .sort((a, b) => a.position - b.position)
+                .map((column) => column.name),
+
+            columnDefinitions: (table.columns || [])
+                .sort((a, b) => a.position - b.position),
 
         })),
 
@@ -526,6 +568,31 @@ function Workspace({ setLoggedIn }) {
         ])),
 
     };
+
+    customTables.forEach((table) => {
+
+        const records =
+            customRecords[table.id] || [];
+
+        const columns =
+            (table.columns || [])
+                .sort(
+                    (a, b) =>
+                        a.position - b.position
+                );
+
+        tableData[`custom-${table.id}`] =
+            records.map((record) =>
+
+                columns.map((column) => {
+
+                    return record[column.name];
+
+                })
+
+            );
+
+    });
 
     const filteredTableData = Object.fromEntries(
 
@@ -577,11 +644,15 @@ function Workspace({ setLoggedIn }) {
 
     const selectedRecord =
         selectedRow
-            ? {
-                products,
-                categories,
-                suppliers,
-            }[selectedRow.table][selectedRow.index]
+            ? (
+                {
+                    products,
+                    categories,
+                    suppliers,
+                }[selectedRow.table]?.[
+                selectedRow.index
+                ] ?? null
+            )
             : null;
 
     const expandedTableConfig = allTables.find(
@@ -714,6 +785,12 @@ function Workspace({ setLoggedIn }) {
                                     index: rowIndex,
 
                                 });
+
+                            }}
+                            onDoubleClick={() => {
+
+                                setStartEditing(false);
+                                setExpandedTable(table.id);
 
                             }}
                             onRemove={() => removeTable(table.id)}
@@ -853,6 +930,7 @@ function Workspace({ setLoggedIn }) {
                                 onDoubleSelectRow={() => { }}
                                 onRemove={() => { }}
                                 onExpand={() => { }}
+                                onDoubleClick={() => { }}
                             />
 
                         );
@@ -874,12 +952,26 @@ function Workspace({ setLoggedIn }) {
                         tableId={expandedTableConfig.id}
                         title={expandedTableConfig.title}
                         columns={expandedTableConfig.columns}
+                        columnDefinitions={
+                            expandedTableConfig.columnDefinitions
+                        }
                         rows={tableData[expandedTableConfig.id]}
-                        records={{
-                            products,
-                            categories,
-                            suppliers,
-                        }[expandedTableConfig.id]}
+                        records={
+                            expandedTableConfig.id.startsWith("custom-")
+                                ? customRecords[
+                                Number(
+                                    expandedTableConfig.id.replace(
+                                        "custom-",
+                                        ""
+                                    )
+                                )
+                                ] || []
+                                : {
+                                    products,
+                                    categories,
+                                    suppliers,
+                                }[expandedTableConfig.id]
+                        }
                         products={products}
                         categories={categories}
                         suppliers={suppliers}
@@ -941,13 +1033,14 @@ function Workspace({ setLoggedIn }) {
                     setNewTableName("");
 
                 }}
-                onCreate={async () => {
+                onCreate={async (columns) => {
 
                     try {
 
                         await createWorkspaceTable({
 
                             name: newTableName,
+                            columns,
 
                         });
 

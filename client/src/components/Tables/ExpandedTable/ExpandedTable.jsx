@@ -23,12 +23,19 @@ import {
     deleteSupplier,
 } from "../../../api/suppliers";
 
+import {
+    createWorkspaceRecord,
+    updateWorkspaceRecord,
+    deleteWorkspaceRecord,
+} from "../../../api/workspaceTables";
+
 function ExpandedTable({
 
     tableId,
 
     title,
     columns,
+    columnDefinitions,
 
     rows,
     records,
@@ -68,14 +75,6 @@ function ExpandedTable({
     const safeRows = rows ?? [];
     const safeRecords = records ?? [];
 
-    const itemName = {
-
-        products: "Product",
-        categories: "Category",
-        suppliers: "Supplier",
-
-    }[tableId];
-
     const filteredData = !searchQuery.trim()
 
         ? safeRows.map((row, index) => ({
@@ -101,6 +100,25 @@ function ExpandedTable({
     const noSearchResults =
         searchQuery.trim() &&
         filteredData.length === 0;
+
+    const isCustomTable =
+        tableId.startsWith("custom-");
+
+    const customColumns =
+        isCustomTable
+            ? columnDefinitions ?? []
+            : [];
+
+
+    const itemName = isCustomTable
+        ? "Record"
+        : {
+
+            products: "Product",
+            categories: "Category",
+            suppliers: "Supplier",
+
+        }[tableId];
 
     useEffect(() => {
 
@@ -156,6 +174,28 @@ function ExpandedTable({
 
     }
 
+    function getInitialValue(column) {
+
+        switch (column.dataType) {
+
+            case "INTEGER":
+            case "DECIMAL":
+                return "";
+
+            case "BOOLEAN":
+                return false;
+
+            case "DATE":
+            case "TIMESTAMP":
+            case "VARCHAR":
+            case "TEXT":
+            default:
+                return "";
+
+        }
+
+    }
+
     function handleCreate() {
 
         if (creatingRow) return;
@@ -201,6 +241,25 @@ function ExpandedTable({
                 break;
 
             default:
+
+                if (isCustomTable) {
+
+                    const initialRecord = {};
+
+                    customColumns.forEach(column => {
+
+                        if (column.isAutoIncrement) {
+                            return;
+                        }
+
+                        initialRecord[column.name] =
+                            getInitialValue(column);
+
+                    });
+
+                    setEditingRecord(initialRecord);
+
+                }
 
                 break;
 
@@ -287,6 +346,18 @@ function ExpandedTable({
 
                     default:
 
+                        if (isCustomTable) {
+
+                            const workspaceTableId =
+                                Number(tableId.replace("custom-", ""));
+
+                            await createWorkspaceRecord(
+                                workspaceTableId,
+                                editingRecord
+                            );
+
+                        }
+
                         break;
 
                 }
@@ -326,27 +397,73 @@ function ExpandedTable({
 
                 case "categories":
 
-                    await updateCategory(editingRecord.id, {
-
-                        name: editingRecord.name,
-
-                    });
+                    await updateCategory(
+                        editingRecord.id,
+                        {
+                            name: editingRecord.name,
+                        }
+                    );
 
                     break;
 
                 case "suppliers":
 
-                    await updateSupplier(editingRecord.id, {
-
-                        name: editingRecord.name,
-                        email: editingRecord.email,
-                        phone: editingRecord.phone,
-
-                    });
+                    await updateSupplier(
+                        editingRecord.id,
+                        {
+                            name: editingRecord.name,
+                            email: editingRecord.email,
+                            phone: editingRecord.phone,
+                        }
+                    );
 
                     break;
 
                 default:
+
+                    if (isCustomTable) {
+
+                        const workspaceTableId =
+                            Number(
+                                tableId.replace("custom-", "")
+                            );
+
+                        const primaryKey =
+                            customColumns.find(
+                                column => column.isPrimaryKey
+                            );
+
+                        if (!primaryKey) {
+
+                            throw new Error(
+                                "This table does not have a primary key."
+                            );
+
+                        }
+
+                        const recordId =
+                            editingRecord[primaryKey.name];
+
+                        const updateData = {};
+
+                        customColumns.forEach(column => {
+
+                            if (column.isPrimaryKey) {
+                                return;
+                            }
+
+                            updateData[column.name] =
+                                editingRecord[column.name];
+
+                        });
+
+                        await updateWorkspaceRecord(
+                            workspaceTableId,
+                            recordId,
+                            updateData
+                        );
+
+                    }
 
                     break;
 
@@ -396,9 +513,40 @@ function ExpandedTable({
                 case "suppliers":
 
                     await deleteSupplier(record.id);
+
                     break;
 
                 default:
+
+                    if (isCustomTable) {
+
+                        const workspaceTableId =
+                            Number(
+                                tableId.replace("custom-", "")
+                            );
+
+                        const primaryKey =
+                            customColumns.find(
+                                column => column.isPrimaryKey
+                            );
+
+                        if (!primaryKey) {
+
+                            throw new Error(
+                                "This table does not have a primary key."
+                            );
+
+                        }
+
+                        const recordId =
+                            record[primaryKey.name];
+
+                        await deleteWorkspaceRecord(
+                            workspaceTableId,
+                            recordId
+                        );
+
+                    }
 
                     break;
 
@@ -707,12 +855,104 @@ function ExpandedTable({
                                             </td>
                                         </>
 
+                                    ) : isCustomTable && editingRow === originalIndex ? (
+
+                                        customColumns.map(column => (
+
+                                            <td key={column.name}>
+
+                                                {column.isAutoIncrement ? (
+
+                                                    <span className="expandedTableAutoValue">
+                                                        {editingRecord?.[column.name] ?? ""}
+                                                    </span>
+
+                                                ) : column.dataType === "BOOLEAN" ? (
+
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            Boolean(
+                                                                editingRecord?.[column.name]
+                                                            )
+                                                        }
+                                                        onChange={(event) =>
+                                                            handleFieldChange(
+                                                                column.name,
+                                                                event.target.checked
+                                                            )
+                                                        }
+                                                        onClick={(event) =>
+                                                            event.stopPropagation()
+                                                        }
+                                                    />
+
+                                                ) : (
+
+                                                    <input
+                                                        className="expandedTableInput"
+                                                        type={
+                                                            column.dataType === "INTEGER"
+                                                                ? "number"
+                                                                : column.dataType === "DECIMAL"
+                                                                    ? "number"
+                                                                    : column.dataType === "DATE"
+                                                                        ? "date"
+                                                                        : column.dataType === "TIMESTAMP"
+                                                                            ? "datetime-local"
+                                                                            : "text"
+                                                        }
+                                                        step={
+                                                            column.dataType === "DECIMAL"
+                                                                ? "0.01"
+                                                                : undefined
+                                                        }
+                                                        value={
+                                                            editingRecord?.[column.name] ?? ""
+                                                        }
+                                                        onChange={(event) => {
+
+                                                            let value =
+                                                                event.target.value;
+
+                                                            if (
+                                                                (
+                                                                    column.dataType === "INTEGER" ||
+                                                                    column.dataType === "DECIMAL"
+                                                                ) &&
+                                                                value !== ""
+                                                            ) {
+
+                                                                value = Number(value);
+
+                                                            }
+
+                                                            handleFieldChange(
+                                                                column.name,
+                                                                value
+                                                            );
+
+                                                        }}
+                                                        onClick={(event) =>
+                                                            event.stopPropagation()
+                                                        }
+                                                    />
+
+                                                )}
+
+                                            </td>
+
+                                        ))
+
                                     ) : (
 
                                         row.map((cell, cellIndex) => (
 
                                             <td key={cellIndex}>
-                                                {cell}
+                                                {cell instanceof Date
+                                                    ? cell.toLocaleString()
+                                                    : String(cell ?? "")
+                                                }
                                             </td>
 
                                         ))
@@ -825,6 +1065,92 @@ function ExpandedTable({
                                         </td>
 
                                     </>
+
+                                )}
+
+                                {isCustomTable && (
+
+                                    customColumns.map(column => (
+
+                                        <td key={column.name}>
+
+                                            {column.isAutoIncrement ? (
+
+                                                <span className="expandedTableAutoValue">
+                                                    Auto
+                                                </span>
+
+                                            ) : column.dataType === "BOOLEAN" ? (
+
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        Boolean(
+                                                            editingRecord?.[column.name]
+                                                        )
+                                                    }
+                                                    onChange={(event) =>
+                                                        handleFieldChange(
+                                                            column.name,
+                                                            event.target.checked
+                                                        )
+                                                    }
+                                                />
+
+                                            ) : (
+
+                                                <input
+                                                    className="expandedTableInput"
+                                                    type={
+                                                        column.dataType === "INTEGER"
+                                                            ? "number"
+                                                            : column.dataType === "DECIMAL"
+                                                                ? "number"
+                                                                : column.dataType === "DATE"
+                                                                    ? "date"
+                                                                    : column.dataType === "TIMESTAMP"
+                                                                        ? "datetime-local"
+                                                                        : "text"
+                                                    }
+                                                    step={
+                                                        column.dataType === "DECIMAL"
+                                                            ? "0.01"
+                                                            : undefined
+                                                    }
+                                                    value={
+                                                        editingRecord?.[column.name] ?? ""
+                                                    }
+                                                    onChange={(event) => {
+
+                                                        let value =
+                                                            event.target.value;
+
+                                                        if (
+                                                            (
+                                                                column.dataType === "INTEGER" ||
+                                                                column.dataType === "DECIMAL"
+                                                            ) &&
+                                                            value !== ""
+                                                        ) {
+
+                                                            value =
+                                                                Number(value);
+
+                                                        }
+
+                                                        handleFieldChange(
+                                                            column.name,
+                                                            value
+                                                        );
+
+                                                    }}
+                                                />
+
+                                            )}
+
+                                        </td>
+
+                                    ))
 
                                 )}
 

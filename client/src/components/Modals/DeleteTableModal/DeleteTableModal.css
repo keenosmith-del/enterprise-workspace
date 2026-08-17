@@ -1,11 +1,137 @@
-@import "../CreateTableModal/CreateTableModal.css";
+.deleteTableModalOverlay {
 
-.createTableModal p {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    z-index: 1001;
+
+}
+
+
+.deleteTableModal {
+
+    width: 420px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+
+    padding: 28px;
+
+    box-sizing: border-box;
+
+    border-radius: 28px;
+
+    background:
+        rgba(255, 255, 255, .045);
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, .22);
+
+}
+
+
+.deleteTableModal h2 {
 
     margin: 0;
 
-    color: rgba(255,255,255,.75);
+    color: rgba(255, 255, 255, .94);
 
-    line-height: 1.5;
+    font-size: 1rem;
+
+    font-weight: 500;
+
+}
+
+
+.deleteTableModal p {
+
+    margin: 0;
+
+    color: rgba(255, 255, 255, .65);
+
+    font-size: .84rem;
+
+    line-height: 1.6;
+
+}
+
+
+.deleteTableActions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+}
+
+
+.deleteTableButton {
+
+    height: 38px;
+
+    padding: 0 18px;
+
+    border-radius: 999px;
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    background:
+        rgba(255, 255, 255, .06);
+
+    color:
+        rgba(255, 255, 255, .82);
+
+    font: inherit;
+
+    font-size: .78rem;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+
+}
+
+
+.deleteTableButton:hover {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+    border-color:
+        rgba(255, 255, 255, .14);
+
+    color:
+        rgba(255, 255, 255, .98);
+
+}
+
+
+.deleteTableButton:active {
+
+    transform: scale(.97);
 
 }

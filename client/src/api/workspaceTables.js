@@ -39,3 +39,68 @@ export function deleteWorkspaceTable(id) {
     });
 
 }
+
+export function addWorkspaceColumn(tableId, data) {
+
+    return api(`/tables/${tableId}/columns`, {
+
+        method: "POST",
+
+        body: JSON.stringify(data),
+
+    });
+
+}
+
+export function getWorkspaceRecords(tableId) {
+
+    return api(`/tables/${tableId}/records`);
+
+}
+
+export function createWorkspaceRecord(tableId, data) {
+
+    return api(`/tables/${tableId}/records`, {
+
+        method: "POST",
+
+        body: JSON.stringify(data),
+
+    });
+
+}
+
+export function updateWorkspaceRecord(
+    tableId,
+    recordId,
+    data
+) {
+
+    return api(
+        `/tables/${tableId}/records/${recordId}`,
+        {
+
+            method: "PUT",
+
+            body: JSON.stringify(data),
+
+        }
+    );
+
+}
+
+export function deleteWorkspaceRecord(
+    tableId,
+    recordId
+) {
+
+    return api(
+        `/tables/${tableId}/records/${recordId}`,
+        {
+
+            method: "DELETE",
+
+        }
+    );
+
+}

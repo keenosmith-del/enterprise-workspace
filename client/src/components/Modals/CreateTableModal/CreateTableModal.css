@@ -7,107 +7,654 @@
     align-items: center;
     justify-content: center;
 
-    /* background: rgba(0, 0, 0, .35); */
+    padding: 32px;
 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, .18);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 
     z-index: 1001;
 
 }
 
-.createTableModal {
 
-    width: 420px;
+.createTableSchemaModal {
+
+    width: min(1500px, calc(100vw - 64px));
+    max-height: calc(100vh - 64px);
 
     display: flex;
     flex-direction: column;
-    gap: 22px;
 
-    padding: 28px;
+    padding: 32px;
 
-    border-radius: 28px;
+    border-radius: 30px;
 
-    background: rgba(255, 255, 255, 0);
+    background:
+        linear-gradient(145deg,
+            rgba(255, 255, 255, .105),
+            rgba(255, 255, 255, .035));
 
-    border: 1px solid rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
 
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, .32),
+        inset 0 1px 0 rgba(255, 255, 255, .08);
+
+    backdrop-filter: blur(34px);
+    -webkit-backdrop-filter: blur(34px);
+
+    overflow: hidden;
 
 }
 
-.createTableModal h2 {
 
-    margin: 0;
+/* -------------------------------------------------- */
+/* Header */
+/* -------------------------------------------------- */
 
-    font-size: 1rem;
+.createTableSchemaModal h2 {
+
+    margin: 0 0 2px;
+
+    color: rgba(255, 255, 255, .94);
+
+    font-size: 1.05rem;
     font-weight: 500;
+    letter-spacing: -.01em;
 
-    color: white;
+    margin-bottom: 20px;
 
 }
+
+
+/* -------------------------------------------------- */
+/* Table name */
+/* -------------------------------------------------- */
 
 .createTableInput {
 
-    height: 44px;
+    width: 100%;
+    height: 48px;
+
+    box-sizing: border-box;
 
     padding: 0 18px;
 
-    border-radius: 999px;
+    border-radius: 15px;
 
-    border: 1px solid rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .09);
 
-    background: rgba(255, 255, 255, .06);
+    background: rgba(255, 255, 255, .055);
 
-    color: white;
+    color: rgba(255, 255, 255, .95);
 
     outline: none;
 
     font: inherit;
+    font-size: .9rem;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+
+    margin-bottom: 20px;
+
+}
+
+.createTableInput:hover {
+
+    background: rgba(255, 255, 255, .07);
+
+}
+
+.createTableInput:focus {
+
+    background: rgba(255, 255, 255, .075);
+
+    border-color:
+        rgba(255, 255, 255, .20);
+
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, .035);
 
 }
 
 .createTableInput::placeholder {
 
-    color: rgba(255, 255, 255, .45);
+    color: rgba(255, 255, 255, .38);
 
 }
+
+
+/* -------------------------------------------------- */
+/* Columns container */
+/* -------------------------------------------------- */
+
+.createTableColumns {
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+
+    border-radius: 20px;
+
+    border: 1px solid rgba(255, 255, 255, .07);
+
+    background: rgba(0, 0, 0, 0.036);
+
+    overflow: hidden;
+
+    margin-bottom: 20px;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Column header */
+/* -------------------------------------------------- */
+
+.createTableColumnsHeader {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(180px, 2fr) minmax(125px, 1.15fr) 52px 62px 76px 62px minmax(150px, 1.4fr) 40px;
+
+    align-items: center;
+
+    min-height: 44px;
+
+    padding: 0 12px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, .07);
+
+    background:
+        rgba(255, 255, 255, .025);
+
+}
+
+.createTableColumnsHeader span {
+
+    color: rgba(255, 255, 255, .42);
+
+    font-size: .68rem;
+    font-weight: 500;
+
+    text-transform: uppercase;
+    letter-spacing: .08em;
+
+    text-align: center;
+
+}
+
+.createTableColumnsHeader span:first-child,
+.createTableColumnsHeader span:nth-child(2),
+.createTableColumnsHeader span:nth-child(7) {
+
+    text-align: left;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Column rows */
+/* -------------------------------------------------- */
+
+.createTableColumnRow {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(180px, 2fr) minmax(125px, 1.15fr) 52px 62px 76px 62px minmax(150px, 1.4fr) 40px;
+
+    align-items: center;
+
+    gap: 0;
+
+    min-height: 66px;
+
+    padding: 8px 12px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, .045);
+
+    transition:
+        background .2s ease;
+
+}
+
+.createTableColumnRow:last-child {
+
+    border-bottom: none;
+
+}
+
+.createTableColumnRow:hover {
+
+    background:
+        rgba(255, 255, 255, .025);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Inputs */
+/* -------------------------------------------------- */
+
+.createTableColumnInput {
+
+    width: calc(100% - 8px);
+    height: 38px;
+
+    box-sizing: border-box;
+
+    padding: 0 12px;
+
+    border-radius: 11px;
+
+    border: 1px solid rgba(255, 255, 255, .07);
+
+    background: rgba(255, 255, 255, .045);
+
+    color: rgba(255, 255, 255, .9);
+
+    outline: none;
+
+    font: inherit;
+    font-size: .78rem;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+
+}
+
+.createTableColumnInput:hover {
+
+    background:
+        rgba(255, 255, 255, .065);
+
+}
+
+.createTableColumnInput:focus {
+
+    background:
+        rgba(255, 255, 255, .075);
+
+    border-color:
+        rgba(255, 255, 255, .18);
+
+}
+
+.createTableColumnInput::placeholder {
+
+    color:
+        rgba(255, 255, 255, .30);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Select */
+/* -------------------------------------------------- */
+
+.createTableColumnRow select {
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    cursor: pointer;
+
+    padding-right: 28px;
+
+    background-image:
+        linear-gradient(45deg,
+            transparent 50%,
+            rgba(255, 255, 255, .45) 50%),
+        linear-gradient(135deg,
+            rgba(255, 255, 255, .45) 50%,
+            transparent 50%);
+
+    background-position:
+        calc(100% - 13px) 16px,
+        calc(100% - 9px) 16px;
+
+    background-size:
+        4px 4px,
+        4px 4px;
+
+    background-repeat: no-repeat;
+
+}
+
+.createTableColumnRow select option {
+
+    background: #151515;
+    color: white;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Checkboxes */
+/* -------------------------------------------------- */
+
+.createTableColumnRow input[type="checkbox"] {
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    justify-self: center;
+
+    width: 17px;
+    height: 17px;
+
+    margin: 0;
+
+    border-radius: 5px;
+
+    border:
+        1px solid rgba(255, 255, 255, .18);
+
+    background:
+        rgba(255, 255, 255, .035);
+
+    cursor: pointer;
+
+    position: relative;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+
+}
+
+.createTableColumnRow input[type="checkbox"]:hover {
+
+    border-color:
+        rgba(255, 255, 255, .32);
+
+}
+
+.createTableColumnRow input[type="checkbox"]:checked {
+
+    background:
+        rgba(255, 255, 255, .82);
+
+    border-color:
+        rgba(255, 255, 255, .82);
+
+}
+
+.createTableColumnRow input[type="checkbox"]:checked::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 5px;
+    top: 2px;
+
+    width: 4px;
+    height: 8px;
+
+    border:
+        solid rgba(0, 0, 0, .75);
+
+    border-width:
+        0 1.5px 1.5px 0;
+
+    transform: rotate(45deg);
+
+}
+
+.createTableColumnRow input[type="checkbox"]:disabled {
+
+    opacity: .25;
+
+    cursor: not-allowed;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Remove column */
+/* -------------------------------------------------- */
+
+.createTableRemoveColumn {
+
+    justify-self: center;
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, .38);
+
+    font-size: 1rem;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    transition:
+        background .18s ease,
+        color .18s ease,
+        opacity .18s ease;
+
+}
+
+.createTableColumnRow:hover .createTableRemoveColumn {
+
+    opacity: 1;
+
+}
+
+.createTableRemoveColumn:hover {
+
+    background:
+        rgba(255, 255, 255, .08);
+
+    color:
+        rgba(255, 255, 255, .9);
+
+}
+
+.createTableRemoveColumn:disabled {
+
+    opacity: .15;
+
+    cursor: not-allowed;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Add column */
+/* -------------------------------------------------- */
+
+.createTableAddColumn {
+
+    align-self: flex-start;
+
+    height: 38px;
+
+    margin-top: 2px;
+
+    padding: 0 15px;
+
+    border-radius: 999px;
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    background:
+        rgba(255, 255, 255, .045);
+
+    color:
+        rgba(255, 255, 255, .65);
+
+    font: inherit;
+    font-size: .76rem;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+
+}
+
+.createTableAddColumn:hover {
+
+    background:
+        rgba(255, 255, 255, .08);
+
+    border-color:
+        rgba(255, 255, 255, .14);
+
+    color:
+        rgba(255, 255, 255, .9);
+
+}
+
+.createTableAddColumn:active {
+
+    transform: scale(.97);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Actions */
+/* -------------------------------------------------- */
 
 .createTableActions {
 
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 2px;
 
 }
 
 .createTableButton {
 
-    height: 38px;
+    height: 40px;
 
     padding: 0 18px;
 
     border-radius: 999px;
 
-    border: 1px solid rgba(255, 255, 255, .08);
+    border:
+        1px solid rgba(255, 255, 255, .08);
 
-    background: rgba(255, 255, 255, .06);
+    background:
+        rgba(255, 255, 255, .055);
 
-    color: white;
+    color:
+        rgba(255, 255, 255, .82);
+
+    font: inherit;
+    font-size: .78rem;
 
     cursor: pointer;
 
     transition:
-        background .25s ease,
-        border-color .25s ease;
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
 
 }
 
 .createTableButton:hover {
 
-    background: rgba(255, 255, 255, .10);
+    background:
+        rgba(255, 255, 255, .10);
 
-    border-color: rgba(255, 255, 255, .14);
+    border-color:
+        rgba(255, 255, 255, .14);
+
+    color:
+        rgba(255, 255, 255, .98);
+
+}
+
+.createTableButton:active {
+
+    transform: scale(.97);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Responsive */
+/* -------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .createTableSchemaModal {
+
+        width: calc(100vw - 32px);
+
+        padding: 24px;
+
+    }
+
+    .createTableColumns {
+
+        overflow-x: auto;
+
+    }
+
+    .createTableColumnsHeader,
+    .createTableColumnRow {
+
+        min-width: 820px;
+
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .createTableModalOverlay {
+
+        padding: 16px;
+
+    }
+
+    .createTableSchemaModal {
+
+        width: calc(100vw - 32px);
+        max-height: calc(100vh - 32px);
+
+        padding: 20px;
+
+        border-radius: 24px;
+
+    }
 
 }

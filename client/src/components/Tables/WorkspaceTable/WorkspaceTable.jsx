@@ -17,6 +17,7 @@ function WorkspaceTable({
     placeholder,
     visualIndex,
     dragPosition,
+    onDoubleClick,
 }) {
     return (
 
@@ -48,6 +49,13 @@ function WorkspaceTable({
 
             }}
             onMouseDown={onActivate}
+            onDoubleClick={(event) => {
+
+                event.stopPropagation();
+
+                onDoubleClick?.();
+
+            }}
         >
 
             <div
