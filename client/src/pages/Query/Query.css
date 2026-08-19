@@ -1,0 +1,130 @@
+/* -------------------------------------------------- */
+/* Query Page */
+/* -------------------------------------------------- */
+
+.queryPage {
+
+    position: absolute;
+
+    top: 24px;
+    left: 324px;
+    right: 24px;
+    bottom: 24px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+
+    padding: 8px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    color: var(--grey);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Scrollbar */
+/* -------------------------------------------------- */
+
+.queryPage::-webkit-scrollbar {
+
+    width: 4px;
+
+}
+
+.queryPage::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+.queryPage::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+    border-radius: 999px;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Header */
+/* -------------------------------------------------- */
+
+.queryHeader {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding:
+        12px 8px 4px;
+
+}
+
+
+.queryEyebrow {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--light-grey);
+
+    font-size: .58rem;
+    font-weight: 500;
+
+    letter-spacing: .10em;
+
+    opacity: .65;
+
+}
+
+
+.queryHeader h1 {
+
+    margin: 0;
+
+    color: var(--grey);
+
+    font-size: 1.45rem;
+    font-weight: 400;
+
+    letter-spacing: -.035em;
+
+}
+
+
+.queryHeader p {
+
+    margin-top: 5px;
+
+    color: var(--light-grey);
+
+    font-size: .72rem;
+    font-weight: 300;
+
+    opacity: .7;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Responsive */
+/* -------------------------------------------------- */
+
+@media (max-width: 700px) {
+
+    .queryPage {
+
+        left: 24px;
+
+    }
+
+}

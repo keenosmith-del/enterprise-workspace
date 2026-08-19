@@ -36,15 +36,19 @@ import EditTableModal from "../../components/Modals/EditTableModal/EditTableModa
 import WorkspaceModeBanner
     from "../../components/Workspace/WorkspaceModeBanner/WorkspaceModeBanner";
 
-function Workspace({ setLoggedIn }) {
+function Workspace({
+    setLoggedIn,
+    currentPage,
+    setCurrentPage,
 
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [suppliers, setSuppliers] = useState([]);
+    products,
+    categories,
+    suppliers,
+    customTables,
+    customRecords,
 
-    const [customTables, setCustomTables] = useState([]);
-
-    const [customRecords, setCustomRecords] = useState({});
+    loadDatabase,
+}) {
 
     const [activeTables, setActiveTables] = useState(() => {
 
@@ -484,120 +488,6 @@ function Workspace({ setLoggedIn }) {
 
     }, [editMode, deleteMode]);
 
-    async function loadWorkspace() {
-
-        try {
-
-            const [
-                productData,
-                categoryData,
-                supplierData,
-                customTableData,
-            ] = await Promise.all([
-
-                getProducts(),
-                getCategories(),
-                getSuppliers(),
-                getWorkspaceTables(),
-
-            ]);
-
-            const customRecordResults =
-                await Promise.allSettled(
-
-                    customTableData.map(
-                        async (table) => {
-
-                            const records =
-                                await getWorkspaceRecords(
-                                    table.id
-                                );
-
-                            return [
-                                table.id,
-                                records,
-                            ];
-
-                        }
-                    )
-
-                );
-
-            const customRecordEntries =
-                customRecordResults
-                    .filter(
-                        result =>
-                            result.status === "fulfilled"
-                    )
-                    .map(
-                        result =>
-                            result.value
-                    );
-
-            customRecordResults
-                .filter(
-                    result =>
-                        result.status === "rejected"
-                )
-                .forEach(
-                    result => {
-
-                        console.error(
-                            "Failed to load a custom table's records:",
-                            result.reason
-                        );
-
-                    }
-                );
-
-            setProducts(productData);
-
-            setCategories(categoryData);
-
-            setSuppliers(supplierData);
-
-            setCustomTables(customTableData);
-
-            setActiveTables(previous => {
-
-                const validTableIds = new Set([
-
-                    ...workspaceTables.map(
-                        table => table.id
-                    ),
-
-                    ...customTableData.map(
-                        table => `custom-${table.id}`
-                    ),
-
-                ]);
-
-                const cleanedTables =
-                    previous.filter(
-                        tableId =>
-                            validTableIds.has(tableId)
-                    );
-
-                return cleanedTables.length > 0
-                    ? cleanedTables
-                    : ["products"];
-
-            });
-
-            setCustomRecords(
-                Object.fromEntries(
-                    customRecordEntries
-                )
-            );
-
-        } catch (error) {
-
-            console.error(error);
-
-        }
-
-    }
-
     useEffect(() => {
 
         localStorage.setItem(
@@ -606,12 +496,6 @@ function Workspace({ setLoggedIn }) {
         );
 
     }, [activeTables]);
-
-    useEffect(() => {
-
-        loadWorkspace();
-
-    }, []);
 
     const allTables = [
 
@@ -795,6 +679,9 @@ function Workspace({ setLoggedIn }) {
                 setEditMode={setEditMode}
                 deleteMode={deleteMode}
                 setDeleteMode={setDeleteMode}
+
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
             />
 
             <WorkspaceCanvas
@@ -1109,7 +996,7 @@ function Workspace({ setLoggedIn }) {
                         products={products}
                         categories={categories}
                         suppliers={suppliers}
-                        loadWorkspace={loadWorkspace}
+                        loadDatabase={loadDatabase}
                         startEditing={startEditing}
                         selectedRow={
                             selectedRow?.table === expandedTableConfig.id
@@ -1179,7 +1066,7 @@ function Workspace({ setLoggedIn }) {
 
                         });
 
-                        await loadWorkspace();
+                        await loadDatabase();
 
                         setCreateTableOpen(false);
 
@@ -1231,7 +1118,7 @@ function Workspace({ setLoggedIn }) {
 
                         await deleteWorkspaceTable(tableId);
 
-                        await loadWorkspace();
+                        await loadDatabase();
 
                         removeTable(tablePendingDelete.id);
 
@@ -1295,7 +1182,7 @@ function Workspace({ setLoggedIn }) {
 
                         });
 
-                        await loadWorkspace();
+                        await loadDatabase();
 
                         setEditModalOpen(false);
 

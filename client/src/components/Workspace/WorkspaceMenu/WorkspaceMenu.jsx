@@ -20,7 +20,6 @@ function WorkspaceMenu({
     removeTable,
 
     activeTables,
-
     tables,
 
     setLoggedIn,
@@ -30,6 +29,13 @@ function WorkspaceMenu({
     setEditMode,
     deleteMode,
     setDeleteMode,
+
+    currentPage,
+    setCurrentPage,
+
+    dashboardMode = false,
+    schemaMode = false,
+    queryMode = false,
 
 }) {
 
@@ -58,224 +64,273 @@ function WorkspaceMenu({
 
             <nav className="workspaceNavigation">
 
-                <button className="workspaceNavigationItem active">
-
-                    <LayoutDashboard
-                        size={16}
-                        strokeWidth={1}
-                    />
-
-                    <span>Workspace</span>
-
-                </button>
-
-                <button className="workspaceNavigationItem">
+                <button
+                    className={`
+            workspaceNavigationItem
+            ${currentPage === "workspace" ? "active" : ""}
+        `}
+                    onClick={() =>
+                        setCurrentPage("workspace")
+                    }
+                >
 
                     <Table2
                         size={16}
                         strokeWidth={1}
                     />
 
-                    <span>Tables</span>
+                    <span>
+                        Tables
+                    </span>
 
                 </button>
 
-                <button className="workspaceNavigationItem">
+
+                <button
+                    className={`
+            workspaceNavigationItem
+            ${currentPage === "dashboard" ? "active" : ""}
+        `}
+                    onClick={() =>
+                        setCurrentPage("dashboard")
+                    }
+                >
+
+                    <LayoutDashboard
+                        size={16}
+                        strokeWidth={1}
+                    />
+
+                    <span>
+                        Workspace
+                    </span>
+
+                </button>
+
+
+                <button
+                    className={`
+            workspaceNavigationItem
+            ${currentPage === "schema"
+                            ? "active"
+                            : ""}
+        `}
+                    onClick={() =>
+                        setCurrentPage("schema")
+                    }
+                >
 
                     <Database
                         size={16}
                         strokeWidth={1}
                     />
 
-                    <span>Schema</span>
+                    <span>
+                        Schema
+                    </span>
 
                 </button>
 
-                <button className="workspaceNavigationItem">
+
+                <button
+                    className={`
+        workspaceNavigationItem
+        ${currentPage === "query" ? "active" : ""}
+    `}
+                    onClick={() =>
+                        setCurrentPage("query")
+                    }
+                >
 
                     <TerminalSquare
                         size={16}
                         strokeWidth={1}
                     />
 
-                    <span>Query</span>
+                    <span>
+                        Query
+                    </span>
 
                 </button>
 
             </nav>
 
+            {!dashboardMode && !schemaMode && !queryMode && (
 
-            <div className="workspaceMenuDivider" />
+                <>
 
+                    <div className="workspaceMenuDivider" />
 
-            <section className="workspaceTableList">
+                    <section className="workspaceTableList">
 
-                <div className="workspaceSectionLabel">
+                        <div className="workspaceSectionLabel">
 
-                    Tables
+                            Tables
 
-                </div>
+                        </div>
 
-                <div className="workspaceTableListItems">
+                        <div className="workspaceTableListItems">
 
-                    {tables.map((table) => {
+                            {tables.map((table) => {
 
-                        const added =
-                            activeTables.includes(table.id);
+                                const added =
+                                    activeTables.includes(table.id);
 
-                        return (
+                                return (
 
-                            <button
-                                key={table.id}
-                                className={`
+                                    <button
+                                        key={table.id}
+                                        className={`
                                     workspaceTableListItem
                                     ${added
-                                        ? "workspaceTableListItemActive"
-                                        : ""}
+                                                ? "workspaceTableListItemActive"
+                                                : ""}
                                 `}
-                                onClick={() => {
+                                        onClick={() => {
 
-                                    if (added) {
+                                            if (added) {
 
-                                        removeTable(table.id);
+                                                removeTable(table.id);
 
-                                    } else {
+                                            } else {
 
-                                        addTable(table.id);
+                                                addTable(table.id);
 
-                                    }
+                                            }
 
-                                }}
+                                        }}
+                                    >
+
+                                        <span
+                                            className="workspaceTableListIndicator"
+                                        >
+
+                                            {added && (
+
+                                                <Check
+                                                    size={14}
+                                                    strokeWidth={1.5}
+                                                />
+
+                                            )}
+
+                                        </span>
+
+                                        <span>
+                                            {table.title}
+                                        </span>
+
+                                    </button>
+
+                                );
+
+                            })}
+
+                        </div>
+
+                    </section>
+
+
+                    <div className="workspaceMenuBottom">
+
+                        <div className="workspaceSectionLabel">
+                            Table Actions
+                        </div>
+
+                        <div className="workspaceMenuActions">
+
+                            <button
+                                className="workspaceMenuAction"
+                                onClick={() =>
+                                    setCreateTableOpen(true)
+                                }
                             >
 
-                                <span
-                                    className="workspaceTableListIndicator"
-                                >
-
-                                    {added && (
-
-                                        <Check
-                                            size={14}
-                                            strokeWidth={1.5}
-                                        />
-
-                                    )}
-
-                                </span>
+                                <Plus
+                                    size={16}
+                                    strokeWidth={1.5}
+                                />
 
                                 <span>
-                                    {table.title}
+                                    New Table
                                 </span>
 
                             </button>
 
-                        );
 
-                    })}
-
-                </div>
-
-            </section>
-
-
-            <div className="workspaceMenuBottom">
-
-                <div className="workspaceSectionLabel">
-                    Table Actions
-                </div>
-
-                <div className="workspaceMenuActions">
-
-                    <button
-                        className="workspaceMenuAction"
-                        onClick={() =>
-                            setCreateTableOpen(true)
-                        }
-                    >
-
-                        <Plus
-                            size={16}
-                            strokeWidth={1.5}
-                        />
-
-                        <span>
-                            New Table
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        className={`
+                            <button
+                                className={`
         workspaceMenuAction
         ${editMode ? "workspaceMenuActionActive" : ""}
     `}
-                        onClick={() => {
+                                onClick={() => {
 
-                            setDeleteMode(false);
-                            setEditMode(true);
+                                    setDeleteMode(false);
+                                    setEditMode(true);
 
-                        }}
-                    >
+                                }}
+                            >
 
-                        <Pencil
-                            size={16}
-                            strokeWidth={1.5}
-                        />
+                                <Pencil
+                                    size={16}
+                                    strokeWidth={1.5}
+                                />
 
-                        <span>
-                            Edit Table
-                        </span>
+                                <span>
+                                    Edit Table
+                                </span>
 
-                    </button>
+                            </button>
 
 
-                    <button
-                        className={`
+                            <button
+                                className={`
         workspaceMenuAction
         ${deleteMode ? "workspaceMenuActionActive" : ""}
     `}
-                        onClick={() => {
+                                onClick={() => {
 
-                            setEditMode(false);
-                            setDeleteMode(true);
+                                    setEditMode(false);
+                                    setDeleteMode(true);
 
-                        }}
-                    >
+                                }}
+                            >
 
-                        <Trash2
-                            size={16}
-                            strokeWidth={1.5}
-                        />
+                                <Trash2
+                                    size={16}
+                                    strokeWidth={1.5}
+                                />
 
-                        <span>
-                            Delete Table
-                        </span>
+                                <span>
+                                    Delete Table
+                                </span>
 
-                    </button>
+                            </button>
 
-                </div>
+                        </div>
 
+                    </div>
 
-                <button
-                    className="workspaceLogout"
-                    onClick={() =>
-                        setLoggedIn(false)
-                    }
-                >
+                </>
+            )}
 
-                    <LogOut
-                        size={16}
-                        strokeWidth={1.5}
-                    />
+            <button
+                className="workspaceLogout"
+                onClick={() =>
+                    setLoggedIn(false)
+                }
+            >
 
-                    <span>
-                        Logout
-                    </span>
+                <LogOut
+                    size={16}
+                    strokeWidth={1.5}
+                />
 
-                </button>
+                <span>
+                    Logout
+                </span>
 
-            </div>
+            </button>
 
         </aside>
 
