@@ -51,7 +51,7 @@
 
     margin: 0;
 
-    color: rgba(255, 255, 255, .94);
+    color: var(--grey) !important;
 
     font-size: 1rem;
 
@@ -64,7 +64,7 @@
 
     margin: 0;
 
-    color: rgba(255, 255, 255, .65);
+    color: var(--light-grey) !important;
 
     font-size: .84rem;
 

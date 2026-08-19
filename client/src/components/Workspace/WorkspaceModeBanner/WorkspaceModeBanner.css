@@ -1,0 +1,165 @@
+.workspaceModeBanner {
+
+    position: fixed;
+
+    top: 24px;
+    left: 60%;
+
+    transform:
+        translateX(-50%) scale(.94);
+
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    min-height: 42px;
+
+    padding: 0 18px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, .12);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    border:
+        1px solid rgba(255, 255, 255, .10);
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, .08);
+
+    color:
+        var(--grey);
+
+    animation:
+        workspaceModeBannerIn .4s cubic-bezier(.22, 1, .36, 1) forwards;
+
+    pointer-events:
+        none;
+
+}
+
+.workspaceModeBanner svg {
+
+    flex-shrink:
+        0;
+
+    color:
+        var(--grey);
+
+}
+
+.workspaceModeBannerTitle {
+
+    color:
+        var(--grey);
+
+    font-size:
+        .76rem;
+
+    font-weight:
+        400;
+
+    white-space:
+        nowrap;
+
+}
+
+.workspaceModeBannerHint {
+
+    padding-left:
+        2px;
+
+    color:
+        var(--light-grey);
+
+    font-size:
+        .68rem;
+
+    font-weight:
+        300;
+
+    white-space:
+        nowrap;
+
+    opacity:
+        .75;
+
+}
+
+.workspaceModeBannerClosing {
+
+    animation:
+        workspaceModeBannerOut .4s cubic-bezier(.22, 1, .36, 1) forwards;
+
+}
+
+@keyframes workspaceModeBannerIn {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translateX(-50%) scale(.88) translateY(-8px);
+
+    }
+
+    60% {
+
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1.015) translateY(0);
+
+    }
+
+    100% {
+
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1) translateY(0);
+
+    }
+
+}
+
+@keyframes workspaceModeBannerOut {
+
+    0% {
+
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1) translateY(0);
+
+    }
+
+    40% {
+
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1.015) translateY(0);
+
+    }
+
+    100% {
+
+        opacity: 0;
+
+        transform:
+            translateX(-50%) scale(.88) translateY(-8px);
+
+    }
+
+}

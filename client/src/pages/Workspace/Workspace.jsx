@@ -33,6 +33,9 @@ import CreateTableModal from "../../components/Modals/CreateTableModal/CreateTab
 import DeleteTableModal from "../../components/Modals/DeleteTableModal/DeleteTableModal";
 import EditTableModal from "../../components/Modals/EditTableModal/EditTableModal";
 
+import WorkspaceModeBanner
+    from "../../components/Workspace/WorkspaceModeBanner/WorkspaceModeBanner";
+
 function Workspace({ setLoggedIn }) {
 
     const [products, setProducts] = useState([]);
@@ -775,6 +778,11 @@ function Workspace({ setLoggedIn }) {
         <main className="app">
 
             <Background />
+
+            <WorkspaceModeBanner
+                editMode={editMode}
+                deleteMode={deleteMode}
+            />
 
             <WorkspaceMenu
                 addTable={addTable}
