@@ -1,4 +1,4 @@
-import background from "../../assets/background-blur.png";
+import background from "../../assets/background.png";
 
 function Background() {
     return (

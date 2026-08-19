@@ -398,3 +398,190 @@
     transform: scale(.96);
 
 }
+
+/* -------------------------------------------------- */
+/* Schema editor */
+/* -------------------------------------------------- */
+
+.expandedTableSchemaEditor {
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+
+}
+
+
+.expandedTableSchemaHeader {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 16px 18px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, .08);
+
+}
+
+
+.expandedTableSchemaHeader h4 {
+
+    margin: 0;
+
+    color:
+        rgba(255, 255, 255, .9);
+
+    font-size: .85rem;
+    font-weight: 500;
+
+}
+
+
+.expandedTableSchemaHeader span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        rgba(255, 255, 255, .38);
+
+    font-size: .7rem;
+
+}
+
+
+.expandedTableSchemaBody {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: auto;
+
+}
+
+
+.expandedTableSchemaBody .expandedTableElement {
+
+    width: 100%;
+
+}
+
+
+.expandedTableSchemaBody .expandedTableElement th {
+
+    position: sticky;
+    top: 0;
+
+    z-index: 2;
+
+}
+
+
+.expandedTableSchemaActions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+}
+
+
+.expandedTableSchemaActions .expandedTableActionButton {
+
+    flex-shrink: 0;
+
+}
+
+
+.expandedTableSchemaActions .expandedTableActionButton:disabled {
+
+    opacity: .25;
+
+    cursor: not-allowed;
+
+}
+
+
+.expandedTableSchemaFooter {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 14px 18px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, .08);
+
+}
+
+
+.expandedTableAddColumnButton,
+.expandedTableSchemaCloseButton {
+
+    height: 36px;
+
+    padding: 0 15px;
+
+    border-radius: 999px;
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    background:
+        rgba(255, 255, 255, .05);
+
+    color:
+        rgba(255, 255, 255, .75);
+
+    font: inherit;
+    font-size: .74rem;
+
+    cursor: pointer;
+
+}
+
+
+.expandedTableAddColumnButton {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+
+.expandedTableAddColumnButton:hover,
+.expandedTableSchemaCloseButton:hover {
+
+    background:
+        rgba(255, 255, 255, .09);
+
+    color:
+        rgba(255, 255, 255, .95);
+
+}
+
+
+.expandedTableAddColumnButton:disabled {
+
+    opacity: .4;
+
+    cursor: not-allowed;
+
+}

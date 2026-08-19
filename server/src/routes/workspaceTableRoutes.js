@@ -10,6 +10,8 @@ import {
     createWorkspaceRecord,
     updateWorkspaceRecord,
     deleteWorkspaceRecord,
+    updateWorkspaceColumn,
+    deleteWorkspaceColumn,
 } from "../controllers/workspaceTableController.js";
 
 const router = express.Router();
@@ -32,6 +34,16 @@ router.put(
 router.delete(
     "/:id/records/:recordId",
     deleteWorkspaceRecord
+);
+
+router.put(
+    "/:id/columns/:columnId",
+    updateWorkspaceColumn
+);
+
+router.delete(
+    "/:id/columns/:columnId",
+    deleteWorkspaceColumn
 );
 
 router.put("/:id", updateWorkspaceTable);

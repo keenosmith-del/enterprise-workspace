@@ -1,7 +1,10 @@
 import "./WorkspaceMenu.css";
 
 import {
-    AlignJustify,
+    LayoutDashboard,
+    Table2,
+    Database,
+    TerminalSquare,
     Check,
     Plus,
     Pencil,
@@ -9,12 +12,9 @@ import {
     LogOut,
 } from "lucide-react";
 
-import IconButton from "../../UI/IconButton/IconButton";
+import background from "../../../assets/background.png";
 
 function WorkspaceMenu({
-
-    menuOpen,
-    setMenuOpen,
 
     addTable,
     removeTable,
@@ -26,122 +26,113 @@ function WorkspaceMenu({
     setLoggedIn,
 
     setCreateTableOpen,
-
+    editMode,
     setEditMode,
-
+    deleteMode,
     setDeleteMode,
 
 }) {
 
     return (
-        <div className="workspaceMenu">
 
-            <IconButton
-                icon={AlignJustify}
-                onClick={() => setMenuOpen(!menuOpen)}
-            />
+        <aside className="workspaceMenu">
 
-            {menuOpen && (
+            <div className="workspaceMenuHeader">
 
-                <div className="workspaceDropdown">
+                <img
+                    className="workspaceMenuAvatar"
+                    src={background}
+                    alt=""
+                />
 
-                    <button
-                        className="workspaceDropdownItem"
-                        onClick={() => {
+                <div className="workspaceMenuHeaderText">
 
-                            setMenuOpen(false);
+                    <h2>Enterprise</h2>
 
-                            setCreateTableOpen(true);
+                    <span>Workspace</span>
 
-                        }}
-                    >
+                </div>
 
-                        <div className="workspaceDropdownLeft">
+            </div>
 
-                            <Plus size={16} />
 
-                            <span>New Table</span>
+            <nav className="workspaceNavigation">
 
-                        </div>
+                <button className="workspaceNavigationItem active">
 
-                    </button>
+                    <LayoutDashboard
+                        size={16}
+                        strokeWidth={1}
+                    />
 
-                    <button
-                        className="workspaceDropdownItem"
-                        onClick={() => {
+                    <span>Workspace</span>
 
-                            setMenuOpen(false);
+                </button>
 
-                            setEditMode(true);
+                <button className="workspaceNavigationItem">
 
-                        }}
-                    >
+                    <Table2
+                        size={16}
+                        strokeWidth={1}
+                    />
 
-                        <div className="workspaceDropdownLeft">
+                    <span>Tables</span>
 
-                            <Pencil size={16} />
+                </button>
 
-                            <span>Edit Table</span>
+                <button className="workspaceNavigationItem">
 
-                        </div>
+                    <Database
+                        size={16}
+                        strokeWidth={1}
+                    />
 
-                    </button>
+                    <span>Schema</span>
 
-                    <button
-                        className="workspaceDropdownItem"
-                        onClick={() => {
+                </button>
 
-                            setMenuOpen(false);
+                <button className="workspaceNavigationItem">
 
-                            setDeleteMode(true);
+                    <TerminalSquare
+                        size={16}
+                        strokeWidth={1}
+                    />
 
-                        }}
-                    >
+                    <span>Query</span>
 
-                        <div className="workspaceDropdownLeft">
+                </button>
 
-                            <Trash2 size={16} />
+            </nav>
 
-                            <span>Delete Table</span>
 
-                        </div>
+            <div className="workspaceMenuDivider" />
 
-                    </button>
 
-                    <div className="workspaceDropdownDivider" />
+            <section className="workspaceTableList">
 
-                    <button
-                        className="workspaceDropdownItem"
-                        onClick={() => {
+                <div className="workspaceSectionLabel">
 
-                            setMenuOpen(false);
+                    Tables
 
-                            setLoggedIn(false);
+                </div>
 
-                        }}
-                    >
-
-                        <div className="workspaceDropdownLeft">
-
-                            <LogOut size={16} />
-
-                            <span>Logout</span>
-
-                        </div>
-
-                    </button>
-
-                    <div className="workspaceDropdownDivider" />
+                <div className="workspaceTableListItems">
 
                     {tables.map((table) => {
 
-                        const added = activeTables.includes(table.id);
+                        const added =
+                            activeTables.includes(table.id);
 
                         return (
 
                             <button
                                 key={table.id}
-                                className="workspaceDropdownItem"
+                                className={`
+                                    workspaceTableListItem
+                                    ${added
+                                        ? "workspaceTableListItemActive"
+                                        : ""}
+                                `}
                                 onClick={() => {
 
                                     if (added) {
@@ -154,20 +145,27 @@ function WorkspaceMenu({
 
                                     }
 
-                                    setMenuOpen(false);
-
                                 }}
                             >
 
-                                <div className="workspaceDropdownLeft">
+                                <span
+                                    className="workspaceTableListIndicator"
+                                >
 
-                                    {added && <Check size={16} />}
+                                    {added && (
 
-                                    {!added && <span className="workspaceCheckPlaceholder" />}
+                                        <Check
+                                            size={14}
+                                            strokeWidth={1.5}
+                                        />
 
-                                    <span>{table.title}</span>
+                                    )}
 
-                                </div>
+                                </span>
+
+                                <span>
+                                    {table.title}
+                                </span>
 
                             </button>
 
@@ -177,9 +175,110 @@ function WorkspaceMenu({
 
                 </div>
 
-            )}
+            </section>
 
-        </div>
+
+            <div className="workspaceMenuBottom">
+
+                <div className="workspaceSectionLabel">
+                    Table Actions
+                </div>
+
+                <div className="workspaceMenuActions">
+
+                    <button
+                        className="workspaceMenuAction"
+                        onClick={() =>
+                            setCreateTableOpen(true)
+                        }
+                    >
+
+                        <Plus
+                            size={16}
+                            strokeWidth={1.5}
+                        />
+
+                        <span>
+                            New Table
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        className={`
+        workspaceMenuAction
+        ${editMode ? "workspaceMenuActionActive" : ""}
+    `}
+                        onClick={() => {
+
+                            setDeleteMode(false);
+                            setEditMode(true);
+
+                        }}
+                    >
+
+                        <Pencil
+                            size={16}
+                            strokeWidth={1.5}
+                        />
+
+                        <span>
+                            Edit Table
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        className={`
+        workspaceMenuAction
+        ${deleteMode ? "workspaceMenuActionActive" : ""}
+    `}
+                        onClick={() => {
+
+                            setEditMode(false);
+                            setDeleteMode(true);
+
+                        }}
+                    >
+
+                        <Trash2
+                            size={16}
+                            strokeWidth={1.5}
+                        />
+
+                        <span>
+                            Delete Table
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <button
+                    className="workspaceLogout"
+                    onClick={() =>
+                        setLoggedIn(false)
+                    }
+                >
+
+                    <LogOut
+                        size={16}
+                        strokeWidth={1.5}
+                    />
+
+                    <span>
+                        Logout
+                    </span>
+
+                </button>
+
+            </div>
+
+        </aside>
+
     );
 
 }

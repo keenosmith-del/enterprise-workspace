@@ -25,57 +25,52 @@ model Supplier {
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   description String?
-  sku         String    @unique
-  price       Decimal   @db.Decimal(10, 2)
-  stock       Int       @default(0)
+  sku         String  @unique
+  price       Decimal @db.Decimal(10, 2)
+  stock       Int     @default(0)
 
-  categoryId  Int
-  supplierId  Int
+  categoryId Int
+  supplierId Int
 
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([categoryId])
   @@index([supplierId])
 }
 
 model WorkspaceTable {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
-  id        Int               @id @default(autoincrement())
-  name      String            @unique
-
-  columns   WorkspaceColumn[]
-
+  columns           WorkspaceColumn[]
   foreignKeyColumns WorkspaceColumn[] @relation("WorkspaceColumnForeignKeyTable")
 
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
 model WorkspaceColumn {
+  id Int @id @default(autoincrement())
 
-  id                Int             @id @default(autoincrement())
+  name     String
+  dataType String
+  position Int
 
-  name              String
-  dataType          String
-  position          Int
+  isPrimaryKey    Boolean @default(false)
+  isAutoIncrement Boolean @default(false)
+  isNullable      Boolean @default(true)
+  isUnique        Boolean @default(false)
+  defaultValue    String?
 
-  isPrimaryKey      Boolean         @default(false)
-  isAutoIncrement   Boolean         @default(false)
-  isNullable        Boolean         @default(true)
-  isUnique          Boolean         @default(false)
-  defaultValue      String?
-
-  tableId           Int
-  table             WorkspaceTable  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  tableId Int
+  table   WorkspaceTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
 
   foreignKeyTableId Int?
   foreignKeyTable   WorkspaceTable? @relation("WorkspaceColumnForeignKeyTable", fields: [foreignKeyTableId], references: [id], onDelete: SetNull)
@@ -85,7 +80,6 @@ model WorkspaceColumn {
 
   referencedByColumns WorkspaceColumn[] @relation("WorkspaceColumnForeignKeyColumn")
 
-  createdAt         DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -58,8 +58,6 @@ function Workspace({ setLoggedIn }) {
     const [editingTable, setEditingTable] = useState(null);
     const [editingRecord, setEditingRecord] = useState(null);
 
-    const [menuOpen, setMenuOpen] = useState(false);
-
     const [selectedRow, setSelectedRow] = useState(null);
 
     const [recordModalOpen, setRecordModalOpen] = useState(false);
@@ -118,8 +116,6 @@ function Workspace({ setLoggedIn }) {
 
         if (activeTables.includes(tableId)) return;
 
-        if (activeTables.length >= 6) return;
-
         setActiveTables(previous => [
             ...previous,
             tableId,
@@ -137,18 +133,27 @@ function Workspace({ setLoggedIn }) {
 
     function getWorkspacePosition(clientX, clientY) {
 
-        const canvas = workspaceCanvasRef.current;
+        const canvas =
+            workspaceCanvasRef.current;
 
         if (!canvas) return null;
 
-        const rect = canvas.getBoundingClientRect();
+        const rect =
+            canvas.getBoundingClientRect();
 
-        const columnWidth = 460;
-        const rowHeight = 300;
-        const gap = 20;
+        const columnCount = 2;
+        const rowHeight = 330;
+        const gap = 24;
+
+        const columnWidth =
+            (
+                canvas.clientWidth -
+                gap
+            ) / columnCount;
 
         const relativeX =
-            clientX - rect.left;
+            clientX -
+            rect.left;
 
         const relativeY =
             clientY -
@@ -159,27 +164,40 @@ function Workspace({ setLoggedIn }) {
             relativeX < 0 ||
             relativeY < 0
         ) {
+
             return null;
+
         }
 
-        const column = Math.floor(
-            relativeX / (columnWidth + gap)
-        );
+        const column =
+            Math.floor(
+                relativeX /
+                (columnWidth + gap)
+            );
 
-        const row = Math.floor(
-            relativeY / (rowHeight + gap)
-        );
+        const row =
+            Math.floor(
+                relativeY /
+                (rowHeight + gap)
+            );
 
-        if (column < 0 || column > 2) {
+        if (
+            column < 0 ||
+            column >= columnCount
+        ) {
+
             return null;
+
         }
 
         if (row < 0) {
+
             return null;
+
         }
 
         return (
-            row * 3 +
+            row * columnCount +
             column
         );
 
@@ -423,11 +441,27 @@ function Workspace({ setLoggedIn }) {
 
         function handleKeyDown(event) {
 
-            if (event.key === "Escape") {
+            if (event.key !== "Escape") {
+                return;
+            }
 
-                cancelTableDrag();
+            if (editMode) {
+
+                setEditMode(false);
+
+                return;
 
             }
+
+            if (deleteMode) {
+
+                setDeleteMode(false);
+
+                return;
+
+            }
+
+            cancelTableDrag();
 
         }
 
@@ -445,7 +479,7 @@ function Workspace({ setLoggedIn }) {
 
         };
 
-    }, []);
+    }, [editMode, deleteMode]);
 
     async function loadWorkspace() {
 
@@ -465,8 +499,8 @@ function Workspace({ setLoggedIn }) {
 
             ]);
 
-            const customRecordEntries =
-                await Promise.all(
+            const customRecordResults =
+                await Promise.allSettled(
 
                     customTableData.map(
                         async (table) => {
@@ -486,6 +520,33 @@ function Workspace({ setLoggedIn }) {
 
                 );
 
+            const customRecordEntries =
+                customRecordResults
+                    .filter(
+                        result =>
+                            result.status === "fulfilled"
+                    )
+                    .map(
+                        result =>
+                            result.value
+                    );
+
+            customRecordResults
+                .filter(
+                    result =>
+                        result.status === "rejected"
+                )
+                .forEach(
+                    result => {
+
+                        console.error(
+                            "Failed to load a custom table's records:",
+                            result.reason
+                        );
+
+                    }
+                );
+
             setProducts(productData);
 
             setCategories(categoryData);
@@ -493,6 +554,32 @@ function Workspace({ setLoggedIn }) {
             setSuppliers(supplierData);
 
             setCustomTables(customTableData);
+
+            setActiveTables(previous => {
+
+                const validTableIds = new Set([
+
+                    ...workspaceTables.map(
+                        table => table.id
+                    ),
+
+                    ...customTableData.map(
+                        table => `custom-${table.id}`
+                    ),
+
+                ]);
+
+                const cleanedTables =
+                    previous.filter(
+                        tableId =>
+                            validTableIds.has(tableId)
+                    );
+
+                return cleanedTables.length > 0
+                    ? cleanedTables
+                    : ["products"];
+
+            });
 
             setCustomRecords(
                 Object.fromEntries(
@@ -628,7 +715,25 @@ function Workspace({ setLoggedIn }) {
 
         }
 
-        return (filteredTableData[tableId] || []).length > 0;
+        const table =
+            allTables.find(
+                table => table.id === tableId
+            );
+
+        const tableNameMatches =
+            table?.title
+                ?.toLowerCase()
+                .includes(
+                    searchQuery.toLowerCase()
+                );
+
+        const tableDataMatches =
+            (filteredTableData[tableId] || []).length > 0;
+
+        return (
+            tableNameMatches ||
+            tableDataMatches
+        );
 
     });
 
@@ -659,21 +764,28 @@ function Workspace({ setLoggedIn }) {
         table => table.id === expandedTable
     );
 
+    console.log("WORKSPACE DATA:", {
+        products,
+        categories,
+        suppliers,
+        tableData,
+    });
+
     return (
         <main className="app">
 
             <Background />
 
             <WorkspaceMenu
-                menuOpen={menuOpen}
-                setMenuOpen={setMenuOpen}
                 addTable={addTable}
                 removeTable={removeTable}
                 activeTables={activeTables}
                 tables={allTables}
                 setLoggedIn={setLoggedIn}
                 setCreateTableOpen={setCreateTableOpen}
+                editMode={editMode}
                 setEditMode={setEditMode}
+                deleteMode={deleteMode}
                 setDeleteMode={setDeleteMode}
             />
 
@@ -693,6 +805,9 @@ function Workspace({ setLoggedIn }) {
                     const tableIndex =
                         activeTables.indexOf(table.id);
 
+                    const displayIndex =
+                        visibleTables.indexOf(table.id);
+
                     const isDragging =
                         dragState?.tableId === table.id &&
                         dragState.dragging;
@@ -707,7 +822,9 @@ function Workspace({ setLoggedIn }) {
                         dragState?.currentIndex ?? draggedIndex;
 
                     let visualIndex =
-                        tableIndex;
+                        searchQuery.trim()
+                            ? displayIndex
+                            : tableIndex;
 
                     if (isDragActive) {
 
@@ -747,6 +864,9 @@ function Workspace({ setLoggedIn }) {
                             title={table.title}
                             columns={table.columns || []}
                             rows={filteredTableData[table.id] || []}
+
+                            editMode={editMode}
+                            deleteMode={deleteMode}
 
                             visualIndex={visualIndex}
 
@@ -838,12 +958,18 @@ function Workspace({ setLoggedIn }) {
                                 setActiveTable(table.id);
 
                             }}
-                            onDragStart={(event) =>
+                            onDragStart={(event) => {
+
+                                if (editMode || deleteMode) {
+                                    return;
+                                }
+
                                 handleTableDragStart(
                                     event,
                                     table.id
-                                )
-                            }
+                                );
+
+                            }}
                             onExpand={() => {
 
                                 setStartEditing(false);

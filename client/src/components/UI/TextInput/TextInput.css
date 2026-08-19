@@ -5,9 +5,9 @@
 }
 
 .textInput label {
-    color: rgba(255, 255, 255, .85);
-    font-size: .9rem;
-    font-weight: 400;
+    color: var(--grey);
+    font-size: 1rem;
+    font-weight: 300;
 }
 
 .textInput input {
@@ -26,9 +26,12 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    color: white;
+    color: var(--grey);
 
     outline: none;
+
+    font-size: 0.85rem;
+    font-weight: 300;
 
     transition:
         background .25s ease,
@@ -38,8 +41,7 @@
 
 .textInput input::placeholder {
 
-    color: rgba(255, 255, 255, .35);
-
+    color: var(--grey);
 }
 
 .textInput input:hover {
@@ -55,14 +57,14 @@
     border-color: rgba(255, 255, 255, .18);
 
     box-shadow:
-        0 0 0 1px rgba(139, 93, 66, .20),
+        0 0 0 1px rgba(139, 93, 66, 0.135),
         0 0 20px rgba(139, 93, 66, .08);
 
 }
 
 .textInput input:focus::placeholder {
 
-    color: rgba(255, 255, 255, .50);
+    color: var(--grey);
 
 }
 
@@ -87,27 +89,30 @@
 
     transform: translateY(-50%);
 
-    color: rgba(255, 255, 255, .6);
+    color: var(--grey);
 
-    font-size: .9rem;
+    font-size: 0.85rem;
+    font-weight: 300;
 
     user-select: none;
 
     cursor: pointer;
 
-    transition: color .2s ease;
+    transition: all .2s ease;
+
+    opacity: 0.6;
 
 }
 
 .togglePassword:hover {
 
-    color: white;
+    opacity: 1;
 
 }
 
 .textInput input.error {
 
-    border: 1px solid rgba(180, 55, 55, .75);
+    border: 1px solid rgba(180, 55, 55, 0.642);
 
     animation: inputShake .35s ease;
 

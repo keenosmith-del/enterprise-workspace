@@ -37,6 +37,17 @@ body {
     overflow: hidden;
 }
 
+* {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Helvetica Neue",
+        Helvetica,
+        Arial,
+        sans-serif;
+}
+
 button,
 input,
 textarea,

@@ -1,6 +1,6 @@
 .searchBar {
 
-    width: 400px;
+    width: 500px;
     height: 46px;
 
     padding: 0 24px;
@@ -13,7 +13,7 @@
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
 
-    color: white;
+    color: var(--grey);
     font-size: .95rem;
 
     outline: none;
@@ -27,7 +27,7 @@
 
 .searchBar::placeholder {
 
-    color: rgba(255,255,255,.45);
+    color: var(--light-grey);
 
 }
 
@@ -41,10 +41,10 @@
 
     background: rgba(255,255,255,.08);
 
-    border-color: rgba(255,255,255,.16);
+    border-color: rgba(246, 246, 246, 0.059);
 
     box-shadow:
-        0 0 0 1px rgba(139,93,66,.18),
-        0 0 20px rgba(139,93,66,.08);
+        0 0 0 1px rgba(225, 224, 224, 0.219),
+        0 0 10px rgba(234, 233, 233, 0.231);
 
 }

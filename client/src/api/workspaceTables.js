@@ -52,6 +52,42 @@ export function addWorkspaceColumn(tableId, data) {
 
 }
 
+export function updateWorkspaceColumn(
+    tableId,
+    columnId,
+    data
+) {
+
+    return api(
+        `/tables/${tableId}/columns/${columnId}`,
+        {
+
+            method: "PUT",
+
+            body: JSON.stringify(data),
+
+        }
+    );
+
+}
+
+
+export function deleteWorkspaceColumn(
+    tableId,
+    columnId
+) {
+
+    return api(
+        `/tables/${tableId}/columns/${columnId}`,
+        {
+
+            method: "DELETE",
+
+        }
+    );
+
+}
+
 export function getWorkspaceRecords(tableId) {
 
     return api(`/tables/${tableId}/records`);

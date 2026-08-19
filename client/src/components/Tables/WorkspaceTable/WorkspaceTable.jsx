@@ -5,6 +5,8 @@ function WorkspaceTable({
     columns,
     rows,
     active,
+    editMode,
+    deleteMode,
     onActivate,
     selectedRow,
     onSelectRow,
@@ -23,22 +25,24 @@ function WorkspaceTable({
 
         <section
             className={`
-        workspaceTable
-        ${active ? "activeTable" : ""}
-        ${dragging ? "draggingTable" : ""}
-        ${placeholder ? "dragPlaceholder" : ""}
-    `}
+    workspaceTable
+    ${active ? "activeTable" : ""}
+    ${editMode ? "editModeTable" : ""}
+    ${deleteMode ? "deleteModeTable" : ""}
+    ${dragging ? "draggingTable" : ""}
+    ${placeholder ? "dragPlaceholder" : ""}
+`}
             style={{
 
                 gridColumn:
                     visualIndex >= 0
-                        ? `${(visualIndex % 3) + 1}`
+                        ? `${(visualIndex % 2) + 1}`
                         : undefined,
 
                 gridRow:
                     visualIndex >= 0
                         ? `${Math.floor(
-                            visualIndex / 3
+                            visualIndex / 2
                         ) + 1}`
                         : undefined,
 
@@ -58,124 +62,128 @@ function WorkspaceTable({
             }}
         >
 
-            <div
-                className="workspaceTableHeader"
-                onPointerDown={(event) => {
+            <div className="workspaceTableScale">
 
-                    event.stopPropagation();
-
-                    onDragStart(event);
-
-                }}
-            >
-
-                <h3>{title}</h3>
-
-                <button
-                    onClick={(event) => {
+                <div
+                    className="workspaceTableHeader"
+                    onPointerDown={(event) => {
 
                         event.stopPropagation();
 
-                        onRemove();
+                        onDragStart(event);
 
                     }}
                 >
-                    ×
-                </button>
 
-            </div>
+                    <h3>{title}</h3>
 
-            <div className="workspaceTableBody">
+                    <button
+                        onClick={(event) => {
 
-                <table className="workspaceTableElement">
+                            event.stopPropagation();
 
-                    <thead>
+                            onRemove();
 
-                        <tr>
+                        }}
+                    >
+                        ×
+                    </button>
 
-                            {columns.map((column) => (
+                </div>
 
-                                <th key={column}>
-                                    {column}
-                                </th>
+                <div className="workspaceTableBody">
 
-                            ))}
+                    <table className="workspaceTableElement">
 
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {rows.length === 0 ? (
+                        <thead>
 
                             <tr>
 
-                                <td
-                                    className="workspaceEmptyState"
-                                    colSpan={columns.length}
-                                >
+                                {columns.map((column) => (
 
-                                    No data available.
+                                    <th key={column}>
+                                        {column}
+                                    </th>
 
-                                    <br />
-
-                                    Create columns to wire date.
-
-                                </td>
+                                ))}
 
                             </tr>
 
-                        ) : (
+                        </thead>
 
-                            rows.map((row, index) => (
+                        <tbody>
 
-                                <tr
-                                    key={index}
-                                    onClick={(event) => {
+                            {rows.length === 0 ? (
 
-                                        event.stopPropagation();
+                                <tr>
 
-                                        onActivate();
+                                    <td
+                                        className="workspaceEmptyState"
+                                        colSpan={columns.length}
+                                    >
 
-                                        onSelectRow(index);
+                                        No data available.
 
-                                    }}
-                                    onDoubleClick={(event) => {
+                                        <br />
 
-                                        event.stopPropagation();
+                                        Create columns to wire date.
 
-                                        onActivate();
-
-                                        onDoubleSelectRow(index);
-
-                                        onExpand();
-
-                                    }}
-                                    className={
-                                        selectedRow === index
-                                            ? "selectedRow"
-                                            : ""
-                                    }
-                                >
-
-                                    {row.map((cell, cellIndex) => (
-
-                                        <td key={cellIndex}>
-                                            {cell}
-                                        </td>
-
-                                    ))}
+                                    </td>
 
                                 </tr>
 
-                            ))
+                            ) : (
 
-                        )}
+                                rows.map((row, index) => (
 
-                    </tbody>
+                                    <tr
+                                        key={index}
+                                        onClick={(event) => {
 
-                </table>
+                                            event.stopPropagation();
+
+                                            onActivate();
+
+                                            onSelectRow(index);
+
+                                        }}
+                                        onDoubleClick={(event) => {
+
+                                            event.stopPropagation();
+
+                                            onActivate();
+
+                                            onDoubleSelectRow(index);
+
+                                            onExpand();
+
+                                        }}
+                                        className={
+                                            selectedRow === index
+                                                ? "selectedRow"
+                                                : ""
+                                        }
+                                    >
+
+                                        {row.map((cell, cellIndex) => (
+
+                                            <td key={cellIndex}>
+                                                {cell}
+                                            </td>
+
+                                        ))}
+
+                                    </tr>
+
+                                ))
+
+                            )}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 

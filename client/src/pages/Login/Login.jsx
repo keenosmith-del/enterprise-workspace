@@ -12,6 +12,8 @@ import background from "../../assets/background.png";
 import { useState, useEffect, useRef } from "react";
 import Workspace from "../Workspace/Workspace";
 
+import "./Login.css";
+
 function Login({ setLoggedIn }) {
 
     const [username, setUsername] = useState("");
@@ -28,6 +30,39 @@ function Login({ setLoggedIn }) {
         usernameRef.current?.focus();
 
     }, []);
+
+    function handleSignIn() {
+
+        const badUsername = username !== "admin";
+        const badPassword = password !== "test123";
+
+        setUsernameError(badUsername);
+        setPasswordError(badPassword);
+
+        if (badUsername) {
+
+            usernameRef.current?.focus();
+
+        } else if (badPassword) {
+
+            passwordRef.current?.focus();
+
+        } else {
+
+            setLoggedIn(true);
+
+            return;
+
+        }
+
+        setTimeout(() => {
+
+            setUsernameError(false);
+            setPasswordError(false);
+
+        }, 3000);
+
+    }
 
     return (
 
@@ -55,6 +90,15 @@ function Login({ setLoggedIn }) {
                         placeholder="Enter username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        onKeyDown={(e) => {
+
+                            if (e.key === "Enter") {
+
+                                handleSignIn();
+
+                            }
+
+                        }}
                         inputRef={usernameRef}
                         error={usernameError}
                     />
@@ -65,6 +109,15 @@ function Login({ setLoggedIn }) {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => {
+
+                            if (e.key === "Enter") {
+
+                                handleSignIn();
+
+                            }
+
+                        }}
                         inputRef={passwordRef}
                         error={passwordError}
                     />
@@ -104,6 +157,14 @@ function Login({ setLoggedIn }) {
                     >
                         Sign In
                     </PrimaryButton>
+
+                    <div className="loginDemoInfo">
+
+                        <span>Demo project — use <strong>admin</strong> to sign in.</span>
+
+                        <span>Password: <strong>test123</strong></span>
+
+                    </div>
 
                 </GlassPanel>
 

@@ -3,16 +3,17 @@
     width: 42px;
     height: 42px;
 
-    border: 1px solid rgba(255,255,255,.08);
-
+    border: 1px solid rgba(255, 255, 255, .08);
     border-radius: 999px;
 
-    background: rgba(255,255,255,.06);
+    background: rgba(116, 116, 116, 0.062);
 
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
 
-    color: white;
+    outline: none;
+
+    color: var(--light-grey);
 
     display: flex;
     align-items: center;
@@ -29,9 +30,11 @@
 
 .iconButton:hover {
 
-    background: rgba(255,255,255,.10);
+    background: rgba(116, 116, 116, 0.083);
 
-    border-color: rgba(255,255,255,.14);
+    border-color: rgba(255, 255, 255, .14);
+
+    transform: scale(.96);
 
 }
 
