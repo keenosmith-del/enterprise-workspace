@@ -17,14 +17,14 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    color: var(--off-white, #e7e2d9);
+    color: var(--grey, #7d7d7dad);
 
-    font-size: .92rem;
+    font-size: .68rem;
     font-weight: 300;
     letter-spacing: .02em;
 
     box-shadow:
-        0 16px 45px rgba(0, 0, 0, .045);
+        0 16px 45px rgba(0, 0, 0, 0.026);
 
     z-index: 99999;
 

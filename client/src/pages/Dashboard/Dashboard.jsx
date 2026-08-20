@@ -1,3 +1,8 @@
+import {
+    useEffect,
+    useState,
+} from "react";
+
 import Background from "../../components/Layout/Background";
 import WorkspaceMenu from "../../components/Workspace/WorkspaceMenu/WorkspaceMenu";
 
@@ -11,7 +16,10 @@ import {
     ArrowUpRight,
 } from "lucide-react";
 
+import { getDatabaseSchema } from "../../api/schema";
+
 import "./Dashboard.css";
+
 
 function Dashboard({
 
@@ -19,72 +27,83 @@ function Dashboard({
     currentPage,
     setCurrentPage,
 
-    products,
-    categories,
-    suppliers,
-    customTables,
-    customRecords,
-
-    loadDatabase,
-
 }) {
 
-    const systemTables = [
-        {
-            id: "products",
-            name: "Products",
-            records: products.length,
-        },
-        {
-            id: "categories",
-            name: "Categories",
-            records: categories.length,
-        },
-        {
-            id: "suppliers",
-            name: "Suppliers",
-            records: suppliers.length,
-        },
-    ];
+    const [schema, setSchema] = useState([]);
 
-    const customTableData = customTables.map(table => ({
+    const [loading, setLoading] = useState(true);
 
-        id: `custom-${table.id}`,
+    const [error, setError] = useState(null);
 
-        name: table.name,
 
-        records:
-            customRecords[table.id]?.length || 0,
+    useEffect(() => {
 
-    }));
+        async function loadDashboard() {
 
-    const allTables = [
-        ...systemTables,
-        ...customTableData,
-    ];
+            try {
+
+                setLoading(true);
+                setError(null);
+
+                const data =
+                    await getDatabaseSchema();
+
+                setSchema(data);
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to load dashboard data:",
+                    error
+                );
+
+                setError(
+                    error.message
+                );
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
+        }
+
+        loadDashboard();
+
+    }, []);
+
+
+    /*
+     * --------------------------------------------------
+     * Database statistics
+     * --------------------------------------------------
+     */
 
     const totalTables =
-        allTables.length;
+        schema.length;
+
 
     const totalRecords =
-        allTables.reduce(
+        schema.reduce(
             (total, table) =>
-                total + table.records,
+                total +
+                (table.records || 0),
             0
         );
 
-    const customTableCount =
-        customTables.length;
 
-    /*
-     * These are currently derived from the
-     * schema metadata available to the application.
-     *
-     * We can make this more sophisticated once
-     * the Schema page and relationship system are built.
-     */
+    const totalColumns =
+        schema.reduce(
+            (total, table) =>
+                total +
+                (table.columns || []).length,
+            0
+        );
+
+
     const relationshipCount =
-        customTables.reduce(
+        schema.reduce(
             (total, table) =>
                 total +
                 (table.columns || []).filter(
@@ -94,13 +113,44 @@ function Dashboard({
             0
         );
 
-    const totalColumns =
-        customTables.reduce(
-            (total, table) =>
-                total +
-                (table.columns || []).length,
-            0
+
+    /*
+     * System tables are the three tables belonging
+     * to the original application database.
+     *
+     * Custom tables are everything else.
+     */
+
+    const systemTableNames = [
+        "Product",
+        "Category",
+        "Supplier",
+    ];
+
+
+    const systemTables =
+        schema.filter(
+            table =>
+                systemTableNames.includes(
+                    table.name
+                )
         );
+
+
+    const customTables =
+        schema.filter(
+            table =>
+                !systemTableNames.includes(
+                    table.name
+                )
+        );
+
+
+    /*
+     * --------------------------------------------------
+     * Render
+     * --------------------------------------------------
+     */
 
     return (
 
@@ -110,409 +160,503 @@ function Dashboard({
 
             <WorkspaceMenu
                 setLoggedIn={setLoggedIn}
-
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-
                 dashboardMode
             />
 
+
             <main className="dashboard">
 
-                <header className="dashboardHeader">
+                {loading && (
 
-                    <div>
+                    <div className="dashboardPanel">
 
-                        <span className="dashboardEyebrow">
-                            DATABASE
-                        </span>
+                        <div className="dashboardEmptyActivity">
 
-                        <h1>
-                            Workspace
-                        </h1>
+                            <div className="dashboardActivityIcon">
 
-                        <p>
-                            Database overview and analytics.
-                        </p>
-
-                    </div>
-
-                    <div className="dashboardHeaderStatus">
-
-                        <span className="dashboardStatusDot" />
-
-                        <span>
-                            Connected
-                        </span>
-
-                    </div>
-
-                </header>
-
-
-                {/* ------------------------------------------------ */}
-                {/* Overview */}
-                {/* ------------------------------------------------ */}
-
-                <section className="dashboardOverview">
-
-                    <div className="dashboardMetricCard">
-
-                        <div className="dashboardMetricIcon">
-
-                            <Database
-                                size={17}
-                                strokeWidth={1.2}
-                            />
-
-                        </div>
-
-                        <div className="dashboardMetricContent">
-
-                            <span>
-                                Tables
-                            </span>
-
-                            <strong>
-                                {totalTables}
-                            </strong>
-
-                        </div>
-
-                        <ArrowUpRight
-                            className="dashboardMetricArrow"
-                            size={15}
-                            strokeWidth={1.2}
-                        />
-
-                    </div>
-
-
-                    <div className="dashboardMetricCard">
-
-                        <div className="dashboardMetricIcon">
-
-                            <Rows3
-                                size={17}
-                                strokeWidth={1.2}
-                            />
-
-                        </div>
-
-                        <div className="dashboardMetricContent">
-
-                            <span>
-                                Records
-                            </span>
-
-                            <strong>
-                                {totalRecords.toLocaleString()}
-                            </strong>
-
-                        </div>
-
-                        <ArrowUpRight
-                            className="dashboardMetricArrow"
-                            size={15}
-                            strokeWidth={1.2}
-                        />
-
-                    </div>
-
-
-                    <div className="dashboardMetricCard">
-
-                        <div className="dashboardMetricIcon">
-
-                            <GitBranch
-                                size={17}
-                                strokeWidth={1.2}
-                            />
-
-                        </div>
-
-                        <div className="dashboardMetricContent">
-
-                            <span>
-                                Relationships
-                            </span>
-
-                            <strong>
-                                {relationshipCount}
-                            </strong>
-
-                        </div>
-
-                        <ArrowUpRight
-                            className="dashboardMetricArrow"
-                            size={15}
-                            strokeWidth={1.2}
-                        />
-
-                    </div>
-
-
-                    <div className="dashboardMetricCard">
-
-                        <div className="dashboardMetricIcon">
-
-                            <Table2
-                                size={17}
-                                strokeWidth={1.2}
-                            />
-
-                        </div>
-
-                        <div className="dashboardMetricContent">
-
-                            <span>
-                                Custom Tables
-                            </span>
-
-                            <strong>
-                                {customTableCount}
-                            </strong>
-
-                        </div>
-
-                        <ArrowUpRight
-                            className="dashboardMetricArrow"
-                            size={15}
-                            strokeWidth={1.2}
-                        />
-
-                    </div>
-
-                </section>
-
-
-                {/* ------------------------------------------------ */}
-                {/* Main analytics */}
-                {/* ------------------------------------------------ */}
-
-                <section className="dashboardGrid">
-
-                    <div className="dashboardPanel dashboardTablePanel">
-
-                        <div className="dashboardPanelHeader">
-
-                            <div>
-
-                                <span className="dashboardPanelLabel">
-                                    TABLE INVENTORY
-                                </span>
-
-                                <h2>
-                                    Tables
-                                </h2>
+                                <Database
+                                    size={18}
+                                    strokeWidth={1.2}
+                                />
 
                             </div>
 
-                            <Table2
-                                size={17}
-                                strokeWidth={1.2}
-                            />
+                            <div>
 
-                        </div>
+                                <span>
+                                    Loading database...
+                                </span>
 
+                                <p>
+                                    Reading database statistics.
+                                </p>
 
-                        <div className="dashboardTableList">
-
-                            {allTables.map(table => {
-
-                                const percentage =
-                                    totalRecords > 0
-                                        ? (
-                                            table.records /
-                                            totalRecords
-                                        ) * 100
-                                        : 0;
-
-                                return (
-
-                                    <div
-                                        className="dashboardTableRow"
-                                        key={table.id}
-                                    >
-
-                                        <div className="dashboardTableName">
-
-                                            <span className="dashboardTableIndicator" />
-
-                                            <span>
-                                                {table.name}
-                                            </span>
-
-                                        </div>
-
-                                        <div className="dashboardTableBar">
-
-                                            <span
-                                                style={{
-                                                    width:
-                                                        `${Math.max(
-                                                            percentage,
-                                                            table.records > 0
-                                                                ? 3
-                                                                : 0
-                                                        )}%`,
-                                                }}
-                                            />
-
-                                        </div>
-
-                                        <span className="dashboardTableCount">
-
-                                            {table.records.toLocaleString()}
-
-                                        </span>
-
-                                    </div>
-
-                                );
-
-                            })}
+                            </div>
 
                         </div>
 
                     </div>
 
+                )}
 
-                    <div className="dashboardPanel dashboardStatisticsPanel">
 
-                        <div className="dashboardPanelHeader">
+                {error && (
+
+                    <div className="dashboardPanel">
+
+                        <div className="dashboardEmptyActivity">
+
+                            <div className="dashboardActivityIcon">
+
+                                <Activity
+                                    size={18}
+                                    strokeWidth={1.2}
+                                />
+
+                            </div>
 
                             <div>
 
-                                <span className="dashboardPanelLabel">
+                                <span>
+                                    Failed to load database
+                                </span>
+
+                                <p>
+                                    {error}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )}
+
+
+                {!loading && !error && (
+
+                    <>
+
+                        {/* -------------------------------------------- */}
+                        {/* Header */}
+                        {/* -------------------------------------------- */}
+
+                        <header className="dashboardHeader">
+
+                            <div>
+
+                                <span className="dashboardEyebrow">
                                     DATABASE
                                 </span>
 
-                                <h2>
-                                    Statistics
-                                </h2>
+                                <h1>
+                                    Workspace
+                                </h1>
+
+                                <p>
+                                    Database overview and analytics.
+                                </p>
 
                             </div>
 
-                            <BarChart3
-                                size={17}
-                                strokeWidth={1.2}
-                            />
 
-                        </div>
+                            <div className="dashboardHeaderStatus">
 
-
-                        <div className="dashboardStatistics">
-
-                            <div className="dashboardStatistic">
+                                <span className="dashboardStatusDot" />
 
                                 <span>
-                                    System tables
+                                    Connected
                                 </span>
-
-                                <strong>
-                                    3
-                                </strong>
 
                             </div>
 
-                            <div className="dashboardStatistic">
+                        </header>
 
-                                <span>
-                                    Custom tables
-                                </span>
 
-                                <strong>
-                                    {customTableCount}
-                                </strong>
+                        {/* -------------------------------------------- */}
+                        {/* Overview */}
+                        {/* -------------------------------------------- */}
+
+                        <section className="dashboardOverview">
+
+
+                            <div className="dashboardMetricCard">
+
+                                <div className="dashboardMetricIcon">
+
+                                    <Database
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+                                <div className="dashboardMetricContent">
+
+                                    <span>
+                                        Tables
+                                    </span>
+
+                                    <strong>
+                                        {totalTables}
+                                    </strong>
+
+                                </div>
+
+                                <ArrowUpRight
+                                    className="dashboardMetricArrow"
+                                    size={15}
+                                    strokeWidth={1.2}
+                                />
 
                             </div>
 
-                            <div className="dashboardStatistic">
 
-                                <span>
-                                    Columns
-                                </span>
+                            <div className="dashboardMetricCard">
 
-                                <strong>
-                                    {totalColumns}
-                                </strong>
+                                <div className="dashboardMetricIcon">
+
+                                    <Rows3
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+                                <div className="dashboardMetricContent">
+
+                                    <span>
+                                        Records
+                                    </span>
+
+                                    <strong>
+                                        {totalRecords.toLocaleString()}
+                                    </strong>
+
+                                </div>
+
+                                <ArrowUpRight
+                                    className="dashboardMetricArrow"
+                                    size={15}
+                                    strokeWidth={1.2}
+                                />
 
                             </div>
 
-                            <div className="dashboardStatistic">
 
-                                <span>
-                                    Relationships
-                                </span>
+                            <div className="dashboardMetricCard">
 
-                                <strong>
-                                    {relationshipCount}
-                                </strong>
+                                <div className="dashboardMetricIcon">
+
+                                    <GitBranch
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+                                <div className="dashboardMetricContent">
+
+                                    <span>
+                                        Relationships
+                                    </span>
+
+                                    <strong>
+                                        {relationshipCount}
+                                    </strong>
+
+                                </div>
+
+                                <ArrowUpRight
+                                    className="dashboardMetricArrow"
+                                    size={15}
+                                    strokeWidth={1.2}
+                                />
 
                             </div>
 
-                        </div>
 
-                    </div>
+                            <div className="dashboardMetricCard">
 
-                </section>
+                                <div className="dashboardMetricIcon">
+
+                                    <Table2
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+                                <div className="dashboardMetricContent">
+
+                                    <span>
+                                        Custom Tables
+                                    </span>
+
+                                    <strong>
+                                        {customTables.length}
+                                    </strong>
+
+                                </div>
+
+                                <ArrowUpRight
+                                    className="dashboardMetricArrow"
+                                    size={15}
+                                    strokeWidth={1.2}
+                                />
+
+                            </div>
+
+                        </section>
 
 
-                {/* ------------------------------------------------ */}
-                {/* Activity */}
-                {/* ------------------------------------------------ */}
+                        {/* -------------------------------------------- */}
+                        {/* Main analytics */}
+                        {/* -------------------------------------------- */}
 
-                <section className="dashboardPanel dashboardActivityPanel">
-
-                    <div className="dashboardPanelHeader">
-
-                        <div>
-
-                            <span className="dashboardPanelLabel">
-                                ACTIVITY
-                            </span>
-
-                            <h2>
-                                Recent Activity
-                            </h2>
-
-                        </div>
-
-                        <Activity
-                            size={17}
-                            strokeWidth={1.2}
-                        />
-
-                    </div>
+                        <section className="dashboardGrid">
 
 
-                    <div className="dashboardEmptyActivity">
+                            {/* Table Inventory */}
 
-                        <div className="dashboardActivityIcon">
+                            <div className="dashboardPanel dashboardTablePanel">
 
-                            <Activity
-                                size={18}
-                                strokeWidth={1.2}
-                            />
+                                <div className="dashboardPanelHeader">
 
-                        </div>
+                                    <div>
 
-                        <div>
+                                        <span className="dashboardPanelLabel">
+                                            TABLE INVENTORY
+                                        </span>
 
-                            <span>
-                                Activity tracking
-                            </span>
+                                        <h2>
+                                            Tables
+                                        </h2>
 
-                            <p>
-                                Database activity will appear here.
-                            </p>
+                                    </div>
 
-                        </div>
+                                    <Table2
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
 
-                    </div>
+                                </div>
 
-                </section>
+
+                                <div className="dashboardTableList">
+
+                                    {schema.map(table => {
+
+                                        const percentage =
+                                            totalRecords > 0
+                                                ? (
+                                                    table.records /
+                                                    totalRecords
+                                                ) * 100
+                                                : 0;
+
+                                        return (
+
+                                            <div
+                                                className="dashboardTableRow"
+                                                key={table.name}
+                                            >
+
+                                                <div className="dashboardTableName">
+
+                                                    <span className="dashboardTableIndicator" />
+
+                                                    <span>
+                                                        {table.name}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div className="dashboardTableBar">
+
+                                                    <span
+                                                        style={{
+                                                            width:
+                                                                `${Math.max(
+                                                                    percentage,
+                                                                    table.records > 0
+                                                                        ? 3
+                                                                        : 0
+                                                                )}%`,
+                                                        }}
+                                                    />
+
+                                                </div>
+
+
+                                                <span className="dashboardTableCount">
+
+                                                    {(
+                                                        table.records ||
+                                                        0
+                                                    ).toLocaleString()}
+
+                                                </span>
+
+                                            </div>
+
+                                        );
+
+                                    })}
+
+                                </div>
+
+                            </div>
+
+
+                            {/* Database Statistics */}
+
+                            <div className="dashboardPanel dashboardStatisticsPanel">
+
+                                <div className="dashboardPanelHeader">
+
+                                    <div>
+
+                                        <span className="dashboardPanelLabel">
+                                            DATABASE
+                                        </span>
+
+                                        <h2>
+                                            Statistics
+                                        </h2>
+
+                                    </div>
+
+                                    <BarChart3
+                                        size={17}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+
+                                <div className="dashboardStatistics">
+
+                                    <div className="dashboardStatistic">
+
+                                        <span>
+                                            System tables
+                                        </span>
+
+                                        <strong>
+                                            {systemTables.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="dashboardStatistic">
+
+                                        <span>
+                                            Custom tables
+                                        </span>
+
+                                        <strong>
+                                            {customTables.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="dashboardStatistic">
+
+                                        <span>
+                                            Columns
+                                        </span>
+
+                                        <strong>
+                                            {totalColumns}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="dashboardStatistic">
+
+                                        <span>
+                                            Relationships
+                                        </span>
+
+                                        <strong>
+                                            {relationshipCount}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        {/* -------------------------------------------- */}
+                        {/* Activity */}
+                        {/* -------------------------------------------- */}
+
+                        <section className="dashboardPanel dashboardActivityPanel">
+
+                            <div className="dashboardPanelHeader">
+
+                                <div>
+
+                                    <span className="dashboardPanelLabel">
+                                        ACTIVITY
+                                    </span>
+
+                                    <h2>
+                                        Recent Activity
+                                    </h2>
+
+                                </div>
+
+                                <Activity
+                                    size={17}
+                                    strokeWidth={1.2}
+                                />
+
+                            </div>
+
+
+                            <div className="dashboardEmptyActivity">
+
+                                <div className="dashboardActivityIcon">
+
+                                    <Activity
+                                        size={18}
+                                        strokeWidth={1.2}
+                                    />
+
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Activity tracking
+                                    </span>
+
+                                    <p>
+                                        Database activity will appear here.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                    </>
+
+                )}
 
             </main>
 

@@ -343,6 +343,380 @@ export const getWorkspaceTables = async (req, res) => {
 
 };
 
+/* ================================================== */
+/* GET DATABASE SCHEMA                                */
+/* ================================================== */
+
+export const getDatabaseSchema = async (req, res) => {
+
+    try {
+
+        /*
+         * --------------------------------------------------
+         * Tables + columns
+         * --------------------------------------------------
+         */
+
+        const tables =
+            await prisma.$queryRaw`
+
+                SELECT
+
+                    c.table_name,
+                    c.column_name,
+                    c.data_type,
+                    c.udt_name,
+                    c.is_nullable,
+                    c.column_default,
+                    c.ordinal_position,
+
+                    CASE
+                        WHEN pk.column_name IS NOT NULL
+                        THEN true
+                        ELSE false
+                    END AS "isPrimaryKey",
+
+                    CASE
+                        WHEN uq.column_name IS NOT NULL
+                        THEN true
+                        ELSE false
+                    END AS "isUnique"
+
+                FROM information_schema.columns c
+
+                LEFT JOIN (
+
+                    SELECT
+                        kcu.table_name,
+                        kcu.column_name
+
+                    FROM information_schema.table_constraints tc
+
+                    JOIN information_schema.key_column_usage kcu
+
+                        ON tc.constraint_name =
+                            kcu.constraint_name
+
+                        AND tc.table_schema =
+                            kcu.table_schema
+
+                    WHERE
+                        tc.table_schema = 'public'
+
+                        AND tc.constraint_type =
+                            'PRIMARY KEY'
+
+                ) pk
+
+                    ON pk.table_name =
+                        c.table_name
+
+                    AND pk.column_name =
+                        c.column_name
+
+                LEFT JOIN (
+
+                    SELECT
+                        kcu.table_name,
+                        kcu.column_name
+
+                    FROM information_schema.table_constraints tc
+
+                    JOIN information_schema.key_column_usage kcu
+
+                        ON tc.constraint_name =
+                            kcu.constraint_name
+
+                        AND tc.table_schema =
+                            kcu.table_schema
+
+                    WHERE
+                        tc.table_schema = 'public'
+
+                        AND tc.constraint_type =
+                            'UNIQUE'
+
+                ) uq
+
+                    ON uq.table_name =
+                        c.table_name
+
+                    AND uq.column_name =
+                        c.column_name
+
+                WHERE
+                    c.table_schema = 'public'
+
+                    AND c.table_name NOT IN (
+                        'WorkspaceTable',
+                        'WorkspaceColumn',
+                        '_prisma_migrations'
+                    )
+
+                ORDER BY
+                    c.table_name,
+                    c.ordinal_position;
+
+            `;
+
+
+        /*
+         * --------------------------------------------------
+         * Foreign keys
+         * --------------------------------------------------
+         */
+
+        const foreignKeys =
+            await prisma.$queryRaw`
+
+                SELECT
+
+                    tc.table_name
+                        AS "tableName",
+
+                    kcu.column_name
+                        AS "columnName",
+
+                    ccu.table_name
+                        AS "referencedTable",
+
+                    ccu.column_name
+                        AS "referencedColumn"
+
+                FROM information_schema.table_constraints tc
+
+                JOIN information_schema.key_column_usage kcu
+
+                    ON tc.constraint_name =
+                        kcu.constraint_name
+
+                    AND tc.table_schema =
+                        kcu.table_schema
+
+                JOIN information_schema.constraint_column_usage ccu
+
+                    ON tc.constraint_name =
+                        ccu.constraint_name
+
+                    AND tc.table_schema =
+                        ccu.table_schema
+
+                WHERE
+
+                    tc.table_schema = 'public'
+
+                    AND tc.constraint_type =
+                        'FOREIGN KEY'
+
+                    AND tc.table_name NOT IN (
+                        'WorkspaceTable',
+                        'WorkspaceColumn',
+                        '_prisma_migrations'
+                    );
+
+            `;
+
+
+        /*
+         * --------------------------------------------------
+         * Build schema structure
+         * --------------------------------------------------
+         */
+
+        const schema = {};
+
+
+        for (const column of tables) {
+
+            const tableName =
+                column.table_name;
+
+
+            if (!schema[tableName]) {
+
+                schema[tableName] = {
+
+                    name: tableName,
+
+                    columns: [],
+
+                    records: 0,
+
+                };
+
+            }
+
+
+            schema[tableName].columns.push({
+
+                name:
+                    column.column_name,
+
+                dataType:
+                    normalizePostgresType(
+                        column.data_type,
+                        column.udt_name
+                    ),
+
+                isPrimaryKey:
+                    Boolean(
+                        column.isPrimaryKey
+                    ),
+
+                isForeignKey:
+                    false,
+
+                isNullable:
+                    column.is_nullable === "YES",
+
+                isUnique:
+                    Boolean(
+                        column.isUnique
+                    ),
+
+                isAutoIncrement:
+                    typeof column.column_default === "string" &&
+                    column.column_default.includes("nextval("),
+
+                defaultValue:
+                    column.column_default,
+
+                foreignKeyTableName:
+                    null,
+
+                foreignKeyColumnName:
+                    null,
+
+                position:
+                    Number(
+                        column.ordinal_position
+                    ),
+
+            });
+
+        }
+
+
+        /*
+         * --------------------------------------------------
+         * Attach foreign key information
+         * --------------------------------------------------
+         */
+
+        for (const foreignKey of foreignKeys) {
+
+            const table =
+                schema[
+                foreignKey.tableName
+                ];
+
+            if (!table) continue;
+
+
+            const column =
+                table.columns.find(
+                    item =>
+                        item.name ===
+                        foreignKey.columnName
+                );
+
+            if (!column) continue;
+
+
+            column.isForeignKey = true;
+
+            column.foreignKeyTableName =
+                foreignKey.referencedTable;
+
+            column.foreignKeyColumnName =
+                foreignKey.referencedColumn;
+
+        }
+
+
+        /*
+         * --------------------------------------------------
+         * Actual record counts
+         * --------------------------------------------------
+         */
+
+        const tableNames =
+            Object.keys(schema);
+
+
+        await Promise.all(
+
+            tableNames.map(
+                async tableName => {
+
+                    /*
+                     * tableName came directly from
+                     * information_schema, so it is
+                     * trusted database metadata.
+                     */
+
+                    const result =
+                        await prisma.$queryRawUnsafe(
+                            `
+                                SELECT COUNT(*)::int AS count
+                                FROM "${tableName.replace(/"/g, '""')}"
+                            `
+                        );
+
+
+                    schema[tableName].records =
+                        result[0]?.count ?? 0;
+
+                }
+            )
+
+        );
+
+
+        /*
+         * --------------------------------------------------
+         * Final response
+         * --------------------------------------------------
+         */
+
+        res.status(200).json(
+
+            Object.values(schema)
+
+                .map(table => ({
+
+                    ...table,
+
+                    columns:
+                        table.columns.sort(
+                            (a, b) =>
+                                a.position -
+                                b.position
+                        ),
+
+                }))
+
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to fetch database schema:",
+            error
+        );
+
+        res.status(500).json({
+
+            message:
+                "Failed to fetch database schema.",
+
+        });
+
+    }
+
+};
+
 
 /* ================================================== */
 /* CREATE TABLE                                       */
@@ -1883,12 +2257,26 @@ export const createWorkspaceRecord = async (req, res) => {
 
         if (insertColumns.length === 0) {
 
-            return res.status(400).json({
+            const insertSQL = `
 
-                message:
-                    "At least one value is required.",
+        INSERT INTO ${quoteIdentifier(
+                table.name
+            )}
 
-            });
+        DEFAULT VALUES
+
+        RETURNING *;
+
+    `;
+
+            const createdRows =
+                await prisma.$queryRawUnsafe(
+                    insertSQL
+                );
+
+            return res.status(201).json(
+                createdRows[0]
+            );
 
         }
 

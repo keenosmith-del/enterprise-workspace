@@ -29,7 +29,7 @@
 
     padding: 0 26px;
 
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 1px solid rgba(240, 240, 240, 0.063);
 
 }
 
@@ -48,47 +48,46 @@
 
     padding: 0 18px;
 
-    border: 1px solid rgba(255, 255, 255, .08);
+    border: 1px solid rgba(244, 242, 242, 0.259) !important;
+
     border-radius: 999px;
 
-    background: rgba(255, 255, 255, .06);
+    background:
+        rgba(255, 255, 255, 0.014);
 
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
 
-    color: white;
+    color: var(--light-grey) !important;
+
     font-size: .85rem;
 
     outline: none;
-
-    transition:
-        background .25s ease,
-        border-color .25s ease,
-        box-shadow .25s ease;
 
 }
 
 .expandedTableSearchBar::placeholder {
 
-    color: rgba(255, 255, 255, .45);
+    color: var(--light-grey);
+    opacity: .7;
 
 }
 
 .expandedTableSearchBar:hover {
 
-    background: rgba(255, 255, 255, .075);
+    background: rgba(234, 233, 233, 0.206);
 
 }
 
 .expandedTableSearchBar:focus {
 
-    background: rgba(255, 255, 255, .08);
+    background: rgba(226, 225, 225, 0.08);
 
-    border-color: rgba(255, 255, 255, .16);
+    border-color: rgba(253, 251, 251, 0.043);
 
     box-shadow:
-        0 0 0 1px rgba(139, 93, 66, .18),
-        0 0 20px rgba(139, 93, 66, .08);
+        0 0 0 1px rgba(139, 93, 66, 0.028),
+        0 0 20px rgba(139, 93, 66, 0.033);
 
 }
 
@@ -96,10 +95,9 @@
 
     margin: 0;
 
-    color: white;
+    color: var(--grey) !important;
 
     font-size: 1rem;
-
     font-weight: 500;
 
 }
@@ -118,7 +116,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    color: white;
+    color: var(--light-grey) !important;
 
     display: flex;
     align-items: center;
@@ -126,18 +124,19 @@
 
     cursor: pointer;
 
-    transition:
-        background .25s ease,
-        border-color .25s ease,
-        transform .2s ease;
+    transition: all .2s ease;
 
 }
 
 .expandedTableHeaderButton:hover {
 
-    background: rgba(255, 255, 255, .10);
+    color: var(--grey) !important;
 
-    border-color: rgba(255, 255, 255, .14);
+    background: rgba(250, 249, 249, 0.193);
+
+    border-color: rgba(255, 255, 255, 0.08);
+
+    transform: scale(1.15);
 
 }
 
@@ -163,7 +162,7 @@
 
 .expandedTableElement thead tr {
 
-    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    border-bottom: 1px solid rgba(235, 234, 234, 0.06);
 
 }
 
@@ -173,9 +172,9 @@
 
     text-align: left;
 
-    color: rgba(255, 255, 255, .65);
+    color: var(--light-grey);
 
-    font-size: .88rem;
+    font-size: .78rem;
 
     font-weight: 400;
 
@@ -185,7 +184,7 @@
 
     padding: 12px 26px;
 
-    color: white;
+    color: var(--grey);
 
     font-size: .82rem;
 
@@ -203,7 +202,7 @@
 
     text-align: center;
 
-    color: rgba(255, 255, 255, .55);
+    color: var(--light-grey);
 
     line-height: 1.8;
 
@@ -370,7 +369,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    color: white;
+    color: var(--light-grey) !important;
 
     display: flex;
     align-items: center;
@@ -378,18 +377,19 @@
 
     cursor: pointer;
 
-    transition:
-        background .25s ease,
-        border-color .25s ease,
-        transform .2s ease;
+    transition: all .2s ease;
 
 }
 
 .expandedTableActionButton:hover {
 
-    background: rgba(255, 255, 255, .10);
+    color: var(--grey) !important;
 
-    border-color: rgba(255, 255, 255, .14);
+    background: rgba(250, 249, 249, 0.193);
+
+    border-color: rgba(255, 255, 255, 0.08);
+
+    transform: scale(1.15);
 
 }
 
@@ -435,10 +435,13 @@
     margin: 0;
 
     color:
-        rgba(255, 255, 255, .9);
+        var(--grey) !important;
 
-    font-size: .85rem;
-    font-weight: 500;
+    font-size:
+        1rem;
+
+    font-weight:
+        500;
 
 }
 
@@ -450,12 +453,30 @@
     margin-top: 3px;
 
     color:
-        rgba(255, 255, 255, .38);
+        var(--light-grey) !important;
 
-    font-size: .7rem;
+    font-size:
+        .7rem;
+
+    opacity:
+        .6;
 
 }
 
+.expandedTableSchemaHeaderActions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Schema body */
+/* -------------------------------------------------- */
 
 .expandedTableSchemaBody {
 
@@ -478,12 +499,277 @@
 .expandedTableSchemaBody .expandedTableElement th {
 
     position: sticky;
+
     top: 0;
 
     z-index: 2;
 
+    background:
+        rgba(233, 233, 233, 0.083);
+
 }
 
+
+/* -------------------------------------------------- */
+/* Schema inputs */
+/* -------------------------------------------------- */
+
+.expandedTableSchemaBody .expandedTableInput {
+
+    width:
+        calc(100% - 6px);
+
+    height:
+        32px;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        0 10px;
+
+    border:
+        none !important;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 255, 255, .07);
+
+    color:
+        var(--grey) !important;
+
+    outline:
+        none;
+
+    font:
+        inherit;
+
+    font-size:
+        .67rem;
+
+    font-weight:
+        300;
+
+    box-shadow:
+        none !important;
+
+}
+
+
+.expandedTableSchemaBody .expandedTableInput:hover {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+}
+
+
+.expandedTableSchemaBody .expandedTableInput:focus {
+
+    background:
+        rgba(255, 255, 255, .12);
+
+    border:
+        none !important;
+
+    box-shadow:
+        none !important;
+
+}
+
+
+.expandedTableSchemaBody .expandedTableInput::placeholder {
+
+    color:
+        var(--light-grey);
+
+    opacity:
+        .5;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Type select */
+/* -------------------------------------------------- */
+
+.expandedTableSchemaBody select.expandedTableInput {
+
+    appearance:
+        none;
+
+    -webkit-appearance:
+        none;
+
+    cursor:
+        pointer;
+
+    padding-right:
+        28px;
+
+    background-image:
+        linear-gradient(45deg,
+            transparent 50%,
+            rgba(53, 53, 53, .35) 50%),
+        linear-gradient(135deg,
+            rgba(53, 53, 53, .35) 50%,
+            transparent 50%);
+
+    background-position:
+        calc(100% - 13px) 13px,
+        calc(100% - 9px) 13px;
+
+    background-size:
+        4px 4px,
+        4px 4px;
+
+    background-repeat:
+        no-repeat;
+
+}
+
+
+.expandedTableSchemaBody select.expandedTableInput option {
+
+    background:
+        #151515;
+
+    color:
+        white;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Schema checkboxes */
+/* -------------------------------------------------- */
+
+.expandedTableSchemaBody input[type="checkbox"] {
+
+    appearance:
+        none !important;
+
+    -webkit-appearance:
+        none !important;
+
+    justify-self:
+        center;
+
+    width:
+        15px !important;
+
+    height:
+        15px !important;
+
+    margin:
+        0;
+
+    border:
+        none !important;
+
+    border-radius:
+        5px;
+
+    background:
+        rgba(190, 190, 190, .38) !important;
+
+    cursor:
+        pointer;
+
+    position:
+        relative;
+
+    box-shadow:
+        none !important;
+
+    transition:
+        background .18s ease,
+        transform .18s ease;
+
+}
+
+
+.expandedTableSchemaBody input[type="checkbox"]:hover {
+
+    background:
+        rgba(175, 175, 175, .52) !important;
+
+    transform:
+        scale(1.04);
+
+}
+
+
+.expandedTableSchemaBody input[type="checkbox"]:checked {
+
+    background:
+        rgba(245, 245, 245, .88) !important;
+
+}
+
+
+.expandedTableSchemaBody input[type="checkbox"]:checked::after {
+
+    content:
+        "✓";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    transform:
+        translate(-50%, -53%);
+
+    color:
+        rgba(105, 105, 105, .95) !important;
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1;
+
+}
+
+
+.expandedTableSchemaBody input[type="checkbox"]:checked:hover {
+
+    background:
+        rgba(225, 225, 225, .88) !important;
+
+}
+
+
+.expandedTableSchemaBody input[type="checkbox"]:disabled {
+
+    background:
+        rgba(150, 150, 150, .16) !important;
+
+    opacity:
+        .45;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Schema action buttons */
+/* -------------------------------------------------- */
 
 .expandedTableSchemaActions {
 
@@ -491,37 +777,65 @@
 
     align-items: center;
 
+    justify-content: flex-end;
+
     gap: 6px;
+
+    min-width: 94px;
 
 }
 
 
 .expandedTableSchemaActions .expandedTableActionButton {
 
-    flex-shrink: 0;
+    flex-shrink:
+        0;
+
+    color:
+        var(--grey) !important;
+
+}
+
+
+.expandedTableSchemaActions .expandedTableActionButton:hover {
+
+    background:
+        rgba(255, 255, 255, .10);
 
 }
 
 
 .expandedTableSchemaActions .expandedTableActionButton:disabled {
 
-    opacity: .25;
+    opacity:
+        .25;
 
-    cursor: not-allowed;
+    cursor:
+        not-allowed;
 
 }
 
 
+/* -------------------------------------------------- */
+/* Schema footer */
+/* -------------------------------------------------- */
+
 .expandedTableSchemaFooter {
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
-    justify-content: space-between;
+    align-items:
+        center;
 
-    gap: 10px;
+    justify-content:
+        space-between;
 
-    padding: 14px 18px;
+    gap:
+        10px;
+
+    padding:
+        14px 18px;
 
     border-top:
         1px solid rgba(255, 255, 255, .08);
@@ -529,59 +843,501 @@
 }
 
 
+/* -------------------------------------------------- */
+/* Add column / Done */
+/* -------------------------------------------------- */
+
 .expandedTableAddColumnButton,
 .expandedTableSchemaCloseButton {
 
-    height: 36px;
+    height:
+        34px;
 
-    padding: 0 15px;
-
-    border-radius: 999px;
+    padding:
+        0 16px;
 
     border:
-        1px solid rgba(255, 255, 255, .08);
+        none !important;
 
-    background:
-        rgba(255, 255, 255, .05);
+    border-radius:
+        999px;
 
-    color:
-        rgba(255, 255, 255, .75);
+    font:
+        inherit;
 
-    font: inherit;
-    font-size: .74rem;
+    font-size:
+        .68rem;
 
-    cursor: pointer;
+    font-weight:
+        400;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
 
 }
 
 
+/* Add Column */
+
 .expandedTableAddColumnButton {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    background:
+        rgba(244, 244, 244, .488) !important;
+
+    color:
+        var(--grey) !important;
+
+}
+
+
+.expandedTableAddColumnButton:hover {
+
+    background:
+        rgba(244, 244, 244, .7) !important;
+
+    color:
+        var(--grey) !important;
+
+}
+
+
+/* Done */
+
+.expandedTableSchemaCloseButton {
+
+    background:
+        rgba(215, 215, 215, .72) !important;
+
+    color:
+        rgba(254, 252, 252, .913) !important;
+
+}
+
+
+.expandedTableSchemaCloseButton:hover {
+
+    background:
+        rgba(185, 185, 185, .78) !important;
+
+    color:
+        rgba(254, 252, 252, .974) !important;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Disabled / active */
+/* -------------------------------------------------- */
+
+.expandedTableAddColumnButton:disabled {
+
+    opacity:
+        .4;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+.expandedTableAddColumnButton:active,
+.expandedTableSchemaCloseButton:active {
+
+    transform:
+        scale(.97);
+
+}
+
+/* -------------------------------------------------- */
+/* Sort menu */
+/* -------------------------------------------------- */
+
+.expandedTableSortMenu {
+
+    position: absolute;
+
+    top: 52px;
+    right: 110px;
+
+    width: 190px;
+
+    padding: 8px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.811);
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, .08);
+
+    z-index: 20;
+
+}
+
+
+.expandedTableSortHeader {
+
+    padding:
+        6px 9px 8px;
+
+    color:
+        var(--light-grey);
+
+    font-size:
+        .6rem;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .07em;
+
+    opacity:
+        .65;
+
+}
+
+
+.expandedTableSortOption,
+.expandedTableSortClear {
+
+    width: 100%;
+
+    height: 32px;
 
     display: flex;
 
     align-items: center;
 
-    gap: 7px;
+    justify-content: space-between;
 
-}
+    padding:
+        0 10px;
 
+    border: none;
 
-.expandedTableAddColumnButton:hover,
-.expandedTableSchemaCloseButton:hover {
+    border-radius: 999px;
 
     background:
-        rgba(255, 255, 255, .09);
+        transparent;
 
     color:
-        rgba(255, 255, 255, .95);
+        var(--light-grey);
+
+    font: inherit;
+
+    font-size:
+        .68rem;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        color .18s ease;
 
 }
 
 
-.expandedTableAddColumnButton:disabled {
+.expandedTableSortOption:hover,
+.expandedTableSortClear:hover {
 
-    opacity: .4;
+    background:
+        rgba(255, 255, 255, .08);
 
-    cursor: not-allowed;
+    color:
+        var(--grey);
+
+}
+
+
+.expandedTableSortOption.active {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+    color:
+        var(--grey);
+
+}
+
+
+.expandedTableSortClear {
+
+    margin-top: 5px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, .06);
+
+    border-radius:
+        12px;
+
+    justify-content:
+        center;
+
+    color:
+        var(--light-grey);
+
+}
+
+/* -------------------------------------------------- */
+/* Filter menu */
+/* -------------------------------------------------- */
+
+.expandedTableFilterMenu {
+
+    position: absolute;
+
+    top: 52px;
+    right: 70px;
+
+    width: 220px;
+
+    padding: 10px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.811);
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, .08);
+
+    z-index: 20;
+
+}
+
+
+.expandedTableFilterHeader {
+
+    padding:
+        5px 9px 9px;
+
+    color:
+        var(--light-grey);
+
+    font-size:
+        .6rem;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .07em;
+
+    opacity:
+        .65;
+
+}
+
+
+.expandedTableFilterField {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        5px;
+
+    margin-bottom:
+        9px;
+
+}
+
+
+.expandedTableFilterField span {
+
+    padding-left:
+        9px;
+
+    color:
+        var(--light-grey);
+
+    font-size:
+        .58rem;
+
+    opacity:
+        .65;
+
+}
+
+
+.expandedTableFilterField input,
+.expandedTableFilterField select {
+
+    width:
+        100%;
+
+    height:
+        32px;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        0 10px;
+
+    border:
+        none;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 255, 255, .07);
+
+    color:
+        var(--grey);
+
+    outline:
+        none;
+
+    font:
+        inherit;
+
+    font-size:
+        .66rem;
+
+}
+
+
+.expandedTableFilterField input::placeholder {
+
+    color:
+        var(--light-grey);
+
+    opacity:
+        .5;
+
+}
+
+
+.expandedTableFilterField input:hover,
+.expandedTableFilterField select:hover {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+}
+
+
+.expandedTableFilterField input:focus,
+.expandedTableFilterField select:focus {
+
+    background:
+        rgba(255, 255, 255, .12);
+
+}
+
+
+.expandedTableFilterField select {
+
+    cursor:
+        pointer;
+
+}
+
+
+.expandedTableFilterField select option {
+
+    background:
+        #151515;
+
+    color:
+        white;
+
+}
+
+
+.expandedTableFilterActions {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    padding-top:
+        3px;
+
+}
+
+
+.expandedTableFilterClear {
+
+    height:
+        30px;
+
+    padding:
+        0 13px;
+
+    border:
+        none;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(244, 244, 244, .488);
+
+    color:
+        var(--grey);
+
+    font:
+        inherit;
+
+    font-size:
+        .64rem;
+
+    cursor:
+        pointer;
+
+}
+
+
+.expandedTableFilterClear:hover {
+
+    background:
+        rgba(244, 244, 244, .7);
+
+}
+
+
+.expandedTableFilterClear:disabled {
+
+    opacity:
+        .35;
+
+    cursor:
+        not-allowed;
 
 }

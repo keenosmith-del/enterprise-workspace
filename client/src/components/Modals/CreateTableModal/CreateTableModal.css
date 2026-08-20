@@ -698,9 +698,9 @@
         999px;
 
     background:
-        rgba(190, 190, 190, .58) !important;
+        rgba(244, 244, 244, 0.488) !important;
 
-    color: rgba(254, 252, 252, 0.913) !important;
+    color: var(--grey) !important;
 
     font:
         inherit;
@@ -723,9 +723,9 @@
 .createTableAddColumn:hover {
 
     background:
-        rgba(165, 165, 165, .68) !important;
+        rgba(244, 244, 244, 0.7) !important;
 
-    color: rgba(254, 252, 252, 0.975) !important;
+    color: var(--grey) !important;
 
 }
 

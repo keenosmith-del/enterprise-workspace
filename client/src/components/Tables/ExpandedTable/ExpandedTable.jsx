@@ -7,6 +7,11 @@ import {
     Trash2,
     Plus,
     Database,
+    X,
+    Check,
+    RotateCcw,
+    ArrowUpDown,
+    ListFilter,
 } from "lucide-react";
 
 import {
@@ -63,7 +68,7 @@ function ExpandedTable({
     categories,
     suppliers,
 
-    loadWorkspace,
+    loadDatabase,
 
     toast,
     setToast,
@@ -87,6 +92,15 @@ function ExpandedTable({
 
     const [searchQuery, setSearchQuery] = useState("");
 
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortDirection, setSortDirection] = useState("asc");
+    const [showSortMenu, setShowSortMenu] = useState(false);
+
+    const [filterColumn, setFilterColumn] = useState(null);
+    const [filterCondition, setFilterCondition] = useState("contains");
+    const [filterValue, setFilterValue] = useState("");
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
+
     const [schemaEditing, setSchemaEditing] = useState(false);
 
     const [schemaColumns, setSchemaColumns] = useState([]);
@@ -100,6 +114,12 @@ function ExpandedTable({
     const [addingSchemaColumn, setAddingSchemaColumn] =
         useState(false);
 
+    const [editingSchemaColumn, setEditingSchemaColumn] = useState(null);
+    const [schemaColumnOriginals, setSchemaColumnOriginals] = useState({});
+
+    const [schemaOriginalColumnIds, setSchemaOriginalColumnIds] = useState([]);
+    const [resettingSchema, setResettingSchema] = useState(false);
+
     const rowRefs = useRef([]);
 
     const createRowRef = useRef(null);
@@ -107,29 +127,136 @@ function ExpandedTable({
     const safeRows = rows ?? [];
     const safeRecords = records ?? [];
 
-    const filteredData = !searchQuery.trim()
-
-        ? safeRows.map((row, index) => ({
+    const filteredData = safeRows
+        .map((row, index) => ({
             row,
             record: safeRecords[index],
             originalIndex: index,
         }))
+        .filter(({ row }) => {
 
-        : safeRows
-            .map((row, index) => ({
-                row,
-                record: safeRecords[index],
-                originalIndex: index,
-            }))
-            .filter(({ row }) =>
-                row.some((cell) =>
-                    String(cell ?? "")
-                        .toLowerCase()
-                        .includes(
-                            searchQuery.toLowerCase()
-                        )
-                )
-            );
+            if (searchQuery.trim()) {
+
+                const matchesSearch =
+                    row.some(cell =>
+                        String(cell ?? "")
+                            .toLowerCase()
+                            .includes(
+                                searchQuery.toLowerCase()
+                            )
+                    );
+
+                if (!matchesSearch) {
+                    return false;
+                }
+
+            }
+
+
+            if (
+                filterColumn === null ||
+                !filterValue.trim()
+            ) {
+
+                return true;
+
+            }
+
+
+            const cellValue =
+                String(
+                    row[filterColumn] ?? ""
+                ).toLowerCase();
+
+            const value =
+                filterValue
+                    .trim()
+                    .toLowerCase();
+
+
+            switch (filterCondition) {
+
+                case "equals":
+
+                    return cellValue === value;
+
+
+                case "notEquals":
+
+                    return cellValue !== value;
+
+
+                case "startsWith":
+
+                    return cellValue.startsWith(
+                        value
+                    );
+
+
+                case "endsWith":
+
+                    return cellValue.endsWith(
+                        value
+                    );
+
+
+                case "contains":
+                default:
+
+                    return cellValue.includes(
+                        value
+                    );
+
+            }
+
+        })
+        .sort((a, b) => {
+
+            if (sortColumn === null) {
+                return 0;
+            }
+
+            const aValue =
+                a.row[sortColumn];
+
+            const bValue =
+                b.row[sortColumn];
+
+            if (
+                aValue === null ||
+                aValue === undefined
+            ) {
+                return 1;
+            }
+
+            if (
+                bValue === null ||
+                bValue === undefined
+            ) {
+                return -1;
+            }
+
+            const aString =
+                String(aValue).toLowerCase();
+
+            const bString =
+                String(bValue).toLowerCase();
+
+            const comparison =
+                aString.localeCompare(
+                    bString,
+                    undefined,
+                    {
+                        numeric: true,
+                        sensitivity: "base",
+                    }
+                );
+
+            return sortDirection === "asc"
+                ? comparison
+                : -comparison;
+
+        });
 
     const noSearchResults =
         searchQuery.trim() &&
@@ -441,9 +568,24 @@ function ExpandedTable({
 
                         if (isCustomTable) {
 
+                            const createData = {};
+
+                            customColumns.forEach(
+                                column => {
+
+                                    if (column.isAutoIncrement) {
+                                        return;
+                                    }
+
+                                    createData[column.name] =
+                                        editingRecord?.[column.name];
+
+                                }
+                            );
+
                             await createWorkspaceRecord(
                                 workspaceTableId,
-                                editingRecord
+                                createData
                             );
 
                         }
@@ -452,7 +594,7 @@ function ExpandedTable({
 
                 }
 
-                await loadWorkspace();
+                await loadDatabase();
 
                 setCreatingRow(false);
 
@@ -575,7 +717,7 @@ function ExpandedTable({
 
             }
 
-            await loadWorkspace();
+            await loadDatabase();
 
             setEditingRow(null);
 
@@ -675,7 +817,7 @@ function ExpandedTable({
 
             }
 
-            await loadWorkspace();
+            await loadDatabase();
 
             setToast({
 
@@ -741,11 +883,18 @@ function ExpandedTable({
 
         if (!isCustomTable) return;
 
-        setSchemaColumns(
+        const initialColumns =
             customColumns.map(
                 column => ({
                     ...column,
                 })
+            );
+
+        setSchemaColumns(initialColumns);
+
+        setSchemaOriginalColumnIds(
+            initialColumns.map(
+                column => column.id
             )
         );
 
@@ -761,6 +910,89 @@ function ExpandedTable({
 
     }
 
+    async function handleSchemaReset() {
+
+        if (!workspaceTableId || resettingSchema) {
+            return;
+        }
+
+        const addedColumns =
+            schemaColumns.filter(
+                column =>
+                    !schemaOriginalColumnIds.includes(
+                        column.id
+                    )
+            );
+
+        if (addedColumns.length === 0) {
+            return;
+        }
+
+        setResettingSchema(true);
+
+        try {
+
+            for (const column of addedColumns) {
+
+                await deleteWorkspaceColumn(
+                    workspaceTableId,
+                    column.id
+                );
+
+            }
+
+            await loadDatabase();
+
+            setSchemaColumns(
+                previous =>
+                    previous.filter(
+                        column =>
+                            schemaOriginalColumnIds.includes(
+                                column.id
+                            )
+                    )
+            );
+
+            setEditingSchemaColumn(null);
+
+            setSchemaColumnOriginals({});
+
+            setToast({
+
+                visible: true,
+
+                message:
+                    addedColumns.length === 1
+                        ? "Added column reverted."
+                        : `${addedColumns.length} added columns reverted.`,
+
+                type: "success",
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            setToast({
+
+                visible: true,
+
+                message:
+                    error.message ||
+                    "Unable to reset added columns.",
+
+                type: "error",
+
+            });
+
+        } finally {
+
+            setResettingSchema(false);
+
+        }
+
+    }
 
     function closeSchemaEditor() {
 
@@ -774,6 +1006,13 @@ function ExpandedTable({
 
         setAddingSchemaColumn(false);
 
+        setEditingSchemaColumn(null);
+
+        setSchemaColumnOriginals({});
+
+        setSchemaOriginalColumnIds([]);
+        setResettingSchema(false);
+
     }
 
 
@@ -782,6 +1021,37 @@ function ExpandedTable({
         field,
         value
     ) {
+
+        setSchemaColumnOriginals(
+            previous => {
+
+                if (previous[columnId]) {
+                    return previous;
+                }
+
+                const original =
+                    schemaColumns.find(
+                        column =>
+                            column.id === columnId
+                    );
+
+                if (!original) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    [columnId]: {
+                        ...original,
+                    },
+                };
+
+            }
+        );
+
+
+        setEditingSchemaColumn(columnId);
+
 
         setSchemaColumns(
             previous =>
@@ -804,6 +1074,29 @@ function ExpandedTable({
         dataType
     ) {
 
+        setSchemaColumnOriginals(
+            previous => {
+
+                if (previous[column.id]) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    [column.id]: {
+                        ...column,
+                    },
+                };
+
+            }
+        );
+
+
+        setEditingSchemaColumn(
+            column.id
+        );
+
+
         setSchemaColumns(
             previous =>
                 previous.map(
@@ -823,8 +1116,7 @@ function ExpandedTable({
                             dataType,
 
                             isAutoIncrement:
-                                dataType ===
-                                    "INTEGER"
+                                dataType === "INTEGER"
                                     ? current.isAutoIncrement
                                     : false,
 
@@ -832,6 +1124,60 @@ function ExpandedTable({
 
                     }
                 )
+        );
+
+    }
+
+    function handleSchemaCancel(
+        columnId
+    ) {
+
+        const original =
+            schemaColumnOriginals[
+            columnId
+            ];
+
+        if (!original) {
+
+            setEditingSchemaColumn(
+                null
+            );
+
+            return;
+
+        }
+
+
+        setSchemaColumns(
+            previous =>
+                previous.map(
+                    column =>
+                        column.id === columnId
+                            ? {
+                                ...original,
+                            }
+                            : column
+                )
+        );
+
+
+        setSchemaColumnOriginals(
+            previous => {
+
+                const updated = {
+                    ...previous,
+                };
+
+                delete updated[columnId];
+
+                return updated;
+
+            }
+        );
+
+
+        setEditingSchemaColumn(
+            null
         );
 
     }
@@ -874,7 +1220,23 @@ function ExpandedTable({
                 data
             );
 
-            await loadWorkspace();
+            await loadDatabase();
+
+            setEditingSchemaColumn(null);
+
+            setSchemaColumnOriginals(
+                previous => {
+
+                    const updated = {
+                        ...previous,
+                    };
+
+                    delete updated[column.id];
+
+                    return updated;
+
+                }
+            );
 
             setToast({
 
@@ -912,9 +1274,7 @@ function ExpandedTable({
     }
 
 
-    async function handleSchemaDelete(
-        column
-    ) {
+    async function handleSchemaDelete(column) {
 
         if (!workspaceTableId) return;
 
@@ -925,7 +1285,7 @@ function ExpandedTable({
                 visible: true,
 
                 message:
-                    "The primary key column cannot be deleted.",
+                    `Unable to delete column "${column.name}" because it is the primary key.`,
 
                 type: "error",
 
@@ -935,16 +1295,7 @@ function ExpandedTable({
 
         }
 
-        const confirmed =
-            window.confirm(
-                `Delete column "${column.name}"? This will permanently remove the column and its data from PostgreSQL.`
-            );
-
-        if (!confirmed) return;
-
-        setDeletingSchemaColumn(
-            column.id
-        );
+        setDeletingSchemaColumn(column.id);
 
         try {
 
@@ -953,16 +1304,31 @@ function ExpandedTable({
                 column.id
             );
 
-            await loadWorkspace();
+            await loadDatabase();
 
             setSchemaColumns(
                 previous =>
                     previous.filter(
                         current =>
-                            current.id !==
-                            column.id
+                            current.id !== column.id
                     )
             );
+
+            setSchemaColumnOriginals(
+                previous => {
+
+                    const updated = {
+                        ...previous,
+                    };
+
+                    delete updated[column.id];
+
+                    return updated;
+
+                }
+            );
+
+            setEditingSchemaColumn(null);
 
             setToast({
 
@@ -984,8 +1350,9 @@ function ExpandedTable({
                 visible: true,
 
                 message:
-                    error.message ||
-                    "Unable to delete column.",
+                    `Unable to delete column "${column.name}". ${error.message ||
+                    "The column may be required by another database constraint."
+                    }`,
 
                 type: "error",
 
@@ -993,9 +1360,7 @@ function ExpandedTable({
 
         } finally {
 
-            setDeletingSchemaColumn(
-                null
-            );
+            setDeletingSchemaColumn(null);
 
         }
 
@@ -1048,7 +1413,7 @@ function ExpandedTable({
                 )
             );
 
-            await loadWorkspace();
+            await loadDatabase();
 
             setToast({
 
@@ -1113,12 +1478,38 @@ function ExpandedTable({
 
                     </div>
 
-                    <button
-                        className="expandedTableHeaderButton"
-                        onClick={closeSchemaEditor}
-                    >
-                        ×
-                    </button>
+                    <div className="expandedTableSchemaHeaderActions">
+
+                        <button
+                            className="expandedTableHeaderButton"
+                            disabled={
+                                resettingSchema ||
+                                schemaColumns.filter(
+                                    column =>
+                                        !schemaOriginalColumnIds.includes(
+                                            column.id
+                                        )
+                                ).length === 0
+                            }
+                            onClick={handleSchemaReset}
+                        >
+                            <RotateCcw
+                                size={15}
+                                strokeWidth={1}
+                            />
+                        </button>
+
+                        <button
+                            className="expandedTableHeaderButton"
+                            onClick={closeSchemaEditor}
+                        >
+                            <X
+                                size={15}
+                                strokeWidth={1}
+                            />
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1366,26 +1757,51 @@ function ExpandedTable({
                                                     className="expandedTableSchemaActions"
                                                 >
 
-                                                    <button
-                                                        className="expandedTableActionButton"
-                                                        disabled={
-                                                            isPrimaryKey ||
-                                                            isSaving ||
-                                                            isDeleting
-                                                        }
-                                                        onClick={() =>
-                                                            handleSchemaSave(
-                                                                column
-                                                            )
-                                                        }
-                                                    >
+                                                    {editingSchemaColumn === column.id && (
 
-                                                        <Pencil
-                                                            size={15}
-                                                            strokeWidth={1}
-                                                        />
+                                                        <>
 
-                                                    </button>
+                                                            <button
+                                                                className="expandedTableActionButton"
+                                                                disabled={
+                                                                    isSaving ||
+                                                                    isDeleting ||
+                                                                    editingSchemaColumn !== column.id
+                                                                }
+                                                                onClick={() =>
+                                                                    handleSchemaSave(column)
+                                                                }
+                                                            >
+                                                                <Check
+                                                                    size={15}
+                                                                    strokeWidth={1}
+                                                                />
+                                                            </button>
+
+
+                                                            <button
+                                                                className="expandedTableActionButton"
+                                                                disabled={
+                                                                    isSaving ||
+                                                                    isDeleting
+                                                                }
+                                                                onClick={() =>
+                                                                    handleSchemaCancel(
+                                                                        column.id
+                                                                    )
+                                                                }
+                                                            >
+
+                                                                <X
+                                                                    size={15}
+                                                                    strokeWidth={1}
+                                                                />
+
+                                                            </button>
+
+                                                        </>
+
+                                                    )}
 
 
                                                     <button
@@ -1473,8 +1889,8 @@ function ExpandedTable({
 
         <section
             className={`expandedTable ${active
-                    ? "activeTable"
-                    : ""
+                ? "activeTable"
+                : ""
                 }`}
         >
 
@@ -1506,6 +1922,263 @@ function ExpandedTable({
                                     }
                                     placeholder="Search..."
                                 />
+
+                                {/* sort button */}
+                                <button
+                                    className="expandedTableHeaderButton"
+                                    title="Sort"
+                                    onClick={() =>
+                                        setShowSortMenu(
+                                            previous => !previous
+                                        )
+                                    }
+                                >
+                                    <ArrowUpDown
+                                        size={16}
+                                        strokeWidth={1}
+                                    />
+                                </button>
+
+                                {/* sort menu */}
+                                {showSortMenu && (
+
+                                    <div className="expandedTableSortMenu">
+
+                                        <div className="expandedTableSortHeader">
+                                            Sort by
+                                        </div>
+
+                                        {columns.map(
+                                            (column, index) => (
+
+                                                <button
+                                                    key={column}
+                                                    className={`expandedTableSortOption ${sortColumn === index
+                                                        ? "active"
+                                                        : ""
+                                                        }`}
+                                                    onClick={() => {
+
+                                                        if (
+                                                            sortColumn === index
+                                                        ) {
+
+                                                            setSortDirection(
+                                                                previous =>
+                                                                    previous === "asc"
+                                                                        ? "desc"
+                                                                        : "asc"
+                                                            );
+
+                                                        } else {
+
+                                                            setSortColumn(index);
+                                                            setSortDirection("asc");
+
+                                                        }
+
+                                                    }}
+                                                >
+
+                                                    <span>
+                                                        {column}
+                                                    </span>
+
+                                                    {sortColumn === index && (
+
+                                                        <span>
+                                                            {sortDirection === "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+
+                                                    )}
+
+                                                </button>
+
+                                            )
+                                        )}
+
+                                        {sortColumn !== null && (
+
+                                            <button
+                                                className="expandedTableSortClear"
+                                                onClick={() => {
+
+                                                    setSortColumn(null);
+                                                    setSortDirection("asc");
+                                                    setShowSortMenu(false);
+
+                                                }}
+                                            >
+                                                Clear sort
+                                            </button>
+
+                                        )}
+
+                                    </div>
+
+                                )}
+
+                                {/* filter button */}
+                                <button
+                                    className="expandedTableHeaderButton"
+                                    title="Filter"
+                                    onClick={() =>
+                                        setShowFilterMenu(
+                                            previous => !previous
+                                        )
+                                    }
+                                >
+                                    <ListFilter
+                                        size={16}
+                                        strokeWidth={1}
+                                    />
+                                </button>
+
+                                {/* filter menu */}
+                                {showFilterMenu && (
+
+                                    <div className="expandedTableFilterMenu">
+
+                                        <div className="expandedTableFilterHeader">
+                                            Filter
+                                        </div>
+
+
+                                        <div className="expandedTableFilterField">
+
+                                            <span>
+                                                Column
+                                            </span>
+
+                                            <select
+                                                value={
+                                                    filterColumn === null
+                                                        ? ""
+                                                        : filterColumn
+                                                }
+                                                onChange={event => {
+
+                                                    const value =
+                                                        event.target.value;
+
+                                                    setFilterColumn(
+                                                        value === ""
+                                                            ? null
+                                                            : Number(value)
+                                                    );
+
+                                                }}
+                                            >
+
+                                                <option value="">
+                                                    Select column
+                                                </option>
+
+                                                {columns.map(
+                                                    (column, index) => (
+
+                                                        <option
+                                                            key={column}
+                                                            value={index}
+                                                        >
+                                                            {column}
+                                                        </option>
+
+                                                    )
+                                                )}
+
+                                            </select>
+
+                                        </div>
+
+
+                                        <div className="expandedTableFilterField">
+
+                                            <span>
+                                                Condition
+                                            </span>
+
+                                            <select
+                                                value={filterCondition}
+                                                onChange={event =>
+                                                    setFilterCondition(
+                                                        event.target.value
+                                                    )
+                                                }
+                                            >
+
+                                                <option value="contains">
+                                                    Contains
+                                                </option>
+
+                                                <option value="equals">
+                                                    Equals
+                                                </option>
+
+                                                <option value="notEquals">
+                                                    Not equals
+                                                </option>
+
+                                                <option value="startsWith">
+                                                    Starts with
+                                                </option>
+
+                                                <option value="endsWith">
+                                                    Ends with
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+
+                                        <div className="expandedTableFilterField">
+
+                                            <span>
+                                                Value
+                                            </span>
+
+                                            <input
+                                                type="text"
+                                                value={filterValue}
+                                                onChange={event =>
+                                                    setFilterValue(
+                                                        event.target.value
+                                                    )
+                                                }
+                                                placeholder="Enter value..."
+                                            />
+
+                                        </div>
+
+
+                                        <div className="expandedTableFilterActions">
+
+                                            <button
+                                                className="expandedTableFilterClear"
+                                                disabled={
+                                                    filterColumn === null &&
+                                                    !filterValue
+                                                }
+                                                onClick={() => {
+
+                                                    setFilterColumn(null);
+                                                    setFilterCondition("contains");
+                                                    setFilterValue("");
+                                                    setShowFilterMenu(false);
+
+                                                }}
+                                            >
+                                                Clear
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                )}
 
 
                                 {isCustomTable && (
@@ -1542,7 +2215,6 @@ function ExpandedTable({
 
                                 </button>
 
-
                                 <button
                                     className="expandedTableHeaderButton"
                                     onClick={
@@ -1556,7 +2228,10 @@ function ExpandedTable({
                                     }
                                 >
 
-                                    ×
+                                    <X
+                                        size={15}
+                                        strokeWidth={1}
+                                    />
 
                                 </button>
 
@@ -2515,9 +3190,9 @@ function ExpandedTable({
 
                                 <div
                                     className={`expandedTableActionBar ${selectedRow !== null ||
-                                            creatingRow
-                                            ? "expandedTableActionBarVisible"
-                                            : "expandedTableActionBarHidden"
+                                        creatingRow
+                                        ? "expandedTableActionBarVisible"
+                                        : "expandedTableActionBarHidden"
                                         }`}
                                 >
 
@@ -2567,7 +3242,10 @@ function ExpandedTable({
                                                 }
                                             >
 
-                                                ✕
+                                                <X
+                                                    size={15}
+                                                    strokeWidth={1}
+                                                />
 
                                             </button>
 
@@ -2578,7 +3256,10 @@ function ExpandedTable({
                                                 }
                                             >
 
-                                                ✓
+                                                <Check
+                                                    size={15}
+                                                    strokeWidth={1}
+                                                />
 
                                             </button>
 

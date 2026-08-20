@@ -2,6 +2,7 @@ import express from "express";
 
 import {
     getWorkspaceTables,
+    getDatabaseSchema,
     createWorkspaceTable,
     updateWorkspaceTable,
     deleteWorkspaceTable,
@@ -17,6 +18,8 @@ import {
 const router = express.Router();
 
 router.get("/", getWorkspaceTables);
+
+router.get("/schema", getDatabaseSchema);
 
 router.post("/", createWorkspaceTable);
 

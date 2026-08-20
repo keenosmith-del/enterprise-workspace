@@ -9,6 +9,8 @@ import supplierRoutes from "./routes/supplierRoutes.js";
 
 import workspaceTableRoutes from "./routes/workspaceTableRoutes.js";
 
+import queryRoutes from "./routes/queryRoutes.js";
+
 dotenv.config();
 
 const app = express();
@@ -20,6 +22,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/tables", workspaceTableRoutes);
+app.use("/api/query", queryRoutes);
 
 app.get("/", (req, res) => {
     res.json({
