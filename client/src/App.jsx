@@ -25,6 +25,7 @@ import Workspace from "./pages/Workspace/Workspace";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Schema from "./pages/Schema/Schema";
 import Query from "./pages/Query/Query";
+import Relationships from "./pages/Relationships/Relationships";
 
 function App() {
 
@@ -34,7 +35,32 @@ function App() {
 
     });
 
-    const [currentPage, setCurrentPage] = useState("workspace");
+    const [currentPage, setCurrentPage] =
+        useState(
+            () =>
+                localStorage.getItem(
+                    "currentPage"
+                ) || "workspace"
+        );
+
+    useEffect(() => {
+
+        localStorage.setItem(
+            "currentPage",
+            currentPage
+        );
+
+    }, [currentPage]);
+
+    function handleLogout() {
+
+        setLoggedIn(false);
+
+        setCurrentPage("workspace");
+
+        localStorage.removeItem("currentPage");
+
+    }
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -149,7 +175,7 @@ function App() {
             {currentPage === "workspace" && (
 
                 <Workspace
-                    setLoggedIn={setLoggedIn}
+                    setLoggedIn={handleLogout}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
 
@@ -167,7 +193,7 @@ function App() {
             {currentPage === "dashboard" && (
 
                 <Dashboard
-                    setLoggedIn={setLoggedIn}
+                    setLoggedIn={handleLogout}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
 
@@ -185,7 +211,7 @@ function App() {
             {currentPage === "schema" && (
 
                 <Schema
-                    setLoggedIn={setLoggedIn}
+                    setLoggedIn={handleLogout}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
 
@@ -203,7 +229,25 @@ function App() {
             {currentPage === "query" && (
 
                 <Query
-                    setLoggedIn={setLoggedIn}
+                    setLoggedIn={handleLogout}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+
+                    products={products}
+                    categories={categories}
+                    suppliers={suppliers}
+                    customTables={customTables}
+                    customRecords={customRecords}
+
+                    loadDatabase={loadDatabase}
+                />
+
+            )}
+
+            {currentPage === "relationships" && (
+
+                <Relationships
+                    setLoggedIn={handleLogout}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
 
