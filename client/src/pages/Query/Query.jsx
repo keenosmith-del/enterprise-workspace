@@ -1343,23 +1343,60 @@ function Query({
                                     <div className="queryCodeCard">
 
                                         <code>
-                                            INSERT INTO "Product" (...)
-                                            VALUES (...);
+                                            INSERT INTO "Product"
+                                            (
+                                            "name",
+                                            "description",
+                                            "sku",
+                                            "price",
+                                            "stock",
+                                            "categoryId",
+                                            "supplierId",
+                                            "updatedAt"
+                                            )
+                                            VALUES
+                                            (
+                                            'Preview Product',
+                                            'Created during application preview',
+                                            'PREVIEW-001',
+                                            1499.00,
+                                            25,
+                                            3,
+                                            3,
+                                            CURRENT_TIMESTAMP
+                                            );
                                         </code>
 
                                         <button
                                             onClick={() =>
-                                                copyQuery(
-                                                    'INSERT INTO "Product" (...) VALUES (...);'
-                                                )
+                                                copyQuery(`INSERT INTO "Product"
+(
+    "name",
+    "description",
+    "sku",
+    "price",
+    "stock",
+    "categoryId",
+    "supplierId",
+    "updatedAt"
+)
+VALUES
+(
+    'Preview Product',
+    'Created during application preview',
+    'PREVIEW-001',
+    1499.00,
+    25,
+    3,
+    3,
+    CURRENT_TIMESTAMP
+);`)
                                             }
                                         >
-
                                             <Copy
                                                 size={13}
                                                 strokeWidth={1.2}
                                             />
-
                                         </button>
 
                                     </div>

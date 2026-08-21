@@ -1167,7 +1167,7 @@ export const deleteWorkspaceTable = async (req, res) => {
                     await transaction.$executeRawUnsafe(
                         `DROP TABLE ${quoteIdentifier(
                             physicalTable.table_name
-                        )} CASCADE`
+                        )}`
                     );
 
                 }
