@@ -29,13 +29,30 @@ import Relationships from "./pages/Relationships/Relationships";
 import QueryHistory from "./pages/QueryHistory/QueryHistory";
 import QueryBuilder from "./pages/QueryBuilder/QueryBuilder";
 
+import SessionTimeoutBanner
+    from "./components/Workspace/SessionTimeoutBanner/SessionTimeoutBanner";
+
 function App() {
+
+    // session inactivity after two minutes
+    const INACTIVITY_LIMIT =
+        2 * 60 * 1000;
+
+    // session inactivity banner countdown 1 minute
+    const WARNING_TIME =
+        60 * 1000;
 
     const [loggedIn, setLoggedIn] = useState(() => {
 
-        return localStorage.getItem("workspace-logged-in") === "true";
+        return sessionStorage.getItem("workspace-logged-in") === "true";
 
     });
+
+    const [sessionWarning, setSessionWarning] =
+        useState(false);
+
+    const [secondsRemaining, setSecondsRemaining] =
+        useState(60);
 
     const [currentPage, setCurrentPage] =
         useState(
@@ -63,6 +80,134 @@ function App() {
         localStorage.removeItem("currentPage");
 
     }
+
+    function handleLogin() {
+
+        setCurrentPage("workspace");
+
+        setLoggedIn(true);
+
+    }
+
+    useEffect(() => {
+
+        if (!loggedIn) {
+
+            setSessionWarning(false);
+            setSecondsRemaining(60);
+
+            return;
+
+        }
+
+
+        let inactivityTimer;
+        let countdownTimer;
+        let logoutTimer;
+
+
+        function resetInactivity() {
+
+            clearTimeout(inactivityTimer);
+            clearTimeout(logoutTimer);
+            clearInterval(countdownTimer);
+
+            setSessionWarning(false);
+            setSecondsRemaining(60);
+
+
+            inactivityTimer =
+                setTimeout(() => {
+
+                    setSessionWarning(true);
+
+                    setSecondsRemaining(60);
+
+
+                    countdownTimer =
+                        setInterval(() => {
+
+                            setSecondsRemaining(
+                                previous => {
+
+                                    if (
+                                        previous <= 1
+                                    ) {
+
+                                        clearInterval(
+                                            countdownTimer
+                                        );
+
+                                        return 0;
+
+                                    }
+
+                                    return previous - 1;
+
+                                }
+                            );
+
+                        }, 1000);
+
+
+                    logoutTimer =
+                        setTimeout(() => {
+
+                            handleLogout();
+
+                        }, WARNING_TIME);
+
+                }, INACTIVITY_LIMIT - WARNING_TIME);
+
+        }
+
+
+        const activityEvents = [
+
+            "mousemove",
+            "mousedown",
+            "keydown",
+            "scroll",
+            "touchstart",
+
+        ];
+
+
+        activityEvents.forEach(
+            event => {
+
+                window.addEventListener(
+                    event,
+                    resetInactivity
+                );
+
+            }
+        );
+
+
+        resetInactivity();
+
+
+        return () => {
+
+            clearTimeout(inactivityTimer);
+            clearTimeout(logoutTimer);
+            clearInterval(countdownTimer);
+
+            activityEvents.forEach(
+                event => {
+
+                    window.removeEventListener(
+                        event,
+                        resetInactivity
+                    );
+
+                }
+            );
+
+        };
+
+    }, [loggedIn]);
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -153,7 +298,7 @@ function App() {
 
     useEffect(() => {
 
-        localStorage.setItem(
+        sessionStorage.setItem(
             "workspace-logged-in",
             loggedIn
         );
@@ -164,7 +309,7 @@ function App() {
 
         return (
             <Login
-                setLoggedIn={setLoggedIn}
+                setLoggedIn={handleLogin}
             />
         );
 
@@ -173,6 +318,15 @@ function App() {
     return (
 
         <>
+            {sessionWarning && (
+
+                <SessionTimeoutBanner
+                    secondsRemaining={
+                        secondsRemaining
+                    }
+                />
+
+            )}
 
             {currentPage === "workspace" && (
 

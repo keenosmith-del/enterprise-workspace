@@ -1,0 +1,169 @@
+.sessionTimeoutBanner {
+
+    position:
+        fixed;
+
+    top:
+        24px;
+
+    left:
+        60%;
+
+    transform:
+        translateX(-50%) scale(.94);
+
+    z-index:
+        2000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    min-height:
+        42px;
+
+    padding:
+        0 18px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 255, 255, .12);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    border:
+        1px solid rgba(255, 255, 255, .10);
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, .08);
+
+    color:
+        var(--grey);
+
+    animation:
+        sessionTimeoutBannerIn .4s cubic-bezier(.22, 1, .36, 1) forwards;
+
+    pointer-events:
+        none;
+
+}
+
+
+.sessionTimeoutBanner svg {
+
+    flex-shrink:
+        0;
+
+    color:
+        var(--grey);
+
+}
+
+
+.sessionTimeoutBannerTitle {
+
+    color:
+        var(--grey);
+
+    font-size:
+        .76rem;
+
+    font-weight:
+        400;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.sessionTimeoutBannerHint {
+
+    padding-left:
+        2px;
+
+    color:
+        var(--light-grey);
+
+    font-size:
+        .68rem;
+
+    font-weight:
+        300;
+
+    white-space:
+        nowrap;
+
+    opacity:
+        .75;
+
+}
+
+
+.sessionTimeoutBannerTimer {
+
+    min-width:
+        38px;
+
+    color:
+        var(--grey);
+
+    font-size:
+        .72rem;
+
+    font-weight:
+        500;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    text-align:
+        right;
+
+}
+
+
+@keyframes sessionTimeoutBannerIn {
+
+    0% {
+
+        opacity:
+            0;
+
+        transform:
+            translateX(-50%) scale(.88) translateY(-8px);
+
+    }
+
+    60% {
+
+        opacity:
+            1;
+
+        transform:
+            translateX(-50%) scale(1.015) translateY(0);
+
+    }
+
+    100% {
+
+        opacity:
+            1;
+
+        transform:
+            translateX(-50%) scale(1) translateY(0);
+
+    }
+
+}

@@ -27,6 +27,8 @@ function Query({
     currentPage,
     setCurrentPage,
 
+    loadDatabase,
+
 }) {
 
     const [query, setQuery] = useState("");
@@ -265,6 +267,31 @@ function Query({
             setResults(data);
 
             saveQueryToHistory(query);
+
+
+            /*
+            --------------------------------------------------
+            Refresh workspace data after mutations
+            --------------------------------------------------
+            */
+
+            const normalizedQuery =
+                query.trim().toUpperCase();
+
+            const isMutation =
+                normalizedQuery.startsWith("INSERT ") ||
+                normalizedQuery.startsWith("UPDATE ") ||
+                normalizedQuery.startsWith("DELETE ") ||
+                normalizedQuery.startsWith("TRUNCATE ") ||
+                normalizedQuery.startsWith("CREATE TABLE ") ||
+                normalizedQuery.startsWith("DROP TABLE ") ||
+                normalizedQuery.startsWith("ALTER TABLE ");
+
+            if (isMutation) {
+
+                await loadDatabase();
+
+            }
 
 
         } catch (error) {
