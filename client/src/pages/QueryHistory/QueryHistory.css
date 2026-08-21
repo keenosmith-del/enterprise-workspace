@@ -1,0 +1,575 @@
+/* -------------------------------------------------- */
+/* Query History Page */
+/* -------------------------------------------------- */
+
+.queryHistoryPage {
+
+    position: absolute;
+
+    top: 24px;
+    left: 324px;
+    right: 24px;
+    bottom: 24px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+
+    padding: 8px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    color: var(--grey);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Scrollbar */
+/* -------------------------------------------------- */
+
+.queryHistoryPage::-webkit-scrollbar {
+
+    width: 4px;
+
+}
+
+.queryHistoryPage::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+.queryHistoryPage::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+    border-radius: 999px;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Content */
+/* -------------------------------------------------- */
+
+.queryHistoryContent {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    min-width: 0;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Header */
+/* -------------------------------------------------- */
+
+.queryHistoryHeader {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        12px 8px 4px;
+
+}
+
+
+.queryHistoryEyebrow {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--grey);
+
+    font-size: .58rem;
+
+    font-weight: 500;
+
+    letter-spacing: .10em;
+
+    opacity: .65;
+
+}
+
+
+.queryHistoryHeader h1 {
+
+    margin: 0;
+
+    color: var(--grey);
+
+    font-size: 1.45rem;
+
+    font-weight: 400;
+
+    letter-spacing: -.035em;
+
+}
+
+
+.queryHistoryHeader p {
+
+    margin-top: 5px;
+
+    color: var(--grey);
+
+    font-size: .72rem;
+
+    font-weight: 300;
+
+    opacity: .7;
+
+}
+
+
+/* -------------------------------------------------- */
+/* History Panel */
+/* -------------------------------------------------- */
+
+.queryHistoryPanel {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(255, 255, 255, .038),
+            rgba(255, 255, 255, .03));
+
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, .03),
+        inset 0 1px 0 rgba(255, 255, 255, .031);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Panel Header */
+/* -------------------------------------------------- */
+
+.queryHistoryPanelHeader {
+
+    min-height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 16px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, .035);
+
+}
+
+
+.queryHistoryPanelTitle {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.queryHistoryPanelIcon {
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, .065);
+
+    color: var(--grey);
+
+}
+
+
+.queryHistoryPanelLabel {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: var(--grey);
+
+    font-size: .50rem;
+
+    font-weight: 500;
+
+    letter-spacing: .09em;
+
+    opacity: .55;
+
+}
+
+
+.queryHistoryPanelTitle h2 {
+
+    margin: 0;
+
+    color: var(--grey);
+
+    font-size: .76rem;
+
+    font-weight: 400;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Empty State */
+/* -------------------------------------------------- */
+
+.queryHistoryEmpty {
+
+    min-height: 260px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    color: var(--grey);
+
+    font-size: .62rem;
+
+    opacity: .55;
+
+}
+
+
+/* -------------------------------------------------- */
+/* Responsive */
+/* -------------------------------------------------- */
+
+@media (max-width: 700px) {
+
+    .queryHistoryPage {
+
+        left: 24px;
+
+    }
+
+}
+
+/* -------------------------------------------------- */
+/* Header actions */
+/* -------------------------------------------------- */
+
+.queryHistoryHeader {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+
+.queryHistoryClearButton {
+
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 12px;
+
+    border: none;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, .055);
+
+    color:
+        var(--grey);
+
+    font: inherit;
+
+    font-size: .62rem;
+
+    font-weight: 300;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+
+}
+
+
+.queryHistoryClearButton:hover {
+
+    background:
+        rgba(255, 255, 255, .10);
+
+}
+
+
+.queryHistoryClearButton:active {
+
+    transform:
+        scale(.97);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Panel count */
+/* -------------------------------------------------- */
+
+.queryHistoryCount {
+
+    color:
+        var(--grey);
+
+    font-size:
+        .55rem;
+
+    font-weight:
+        300;
+
+    opacity:
+        .55;
+
+}
+
+
+/* -------------------------------------------------- */
+/* History list */
+/* -------------------------------------------------- */
+
+.queryHistoryList {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    border-top:
+        1px solid rgba(255, 255, 255, .035);
+
+}
+
+
+/* -------------------------------------------------- */
+/* History item */
+/* -------------------------------------------------- */
+
+.queryHistoryItem {
+
+    width:
+        100%;
+
+    min-height:
+        64px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        10px 16px;
+
+    border:
+        none;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, .035);
+
+    background:
+        transparent;
+
+    color:
+        var(--grey);
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease;
+
+}
+
+
+.queryHistoryItem:last-child {
+
+    border-bottom:
+        none;
+
+}
+
+
+.queryHistoryItem:hover {
+
+    background:
+        rgba(255, 255, 255, .045);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Query icon */
+/* -------------------------------------------------- */
+
+.queryHistoryItemIcon {
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(255, 255, 255, .055);
+
+    color:
+        var(--grey);
+
+}
+
+
+/* -------------------------------------------------- */
+/* Query content */
+/* -------------------------------------------------- */
+
+.queryHistoryItemContent {
+
+    min-width:
+        0;
+
+    flex:
+        1;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+
+}
+
+
+.queryHistoryItemContent code {
+
+    display:
+        block;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--grey);
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+    font-size:
+        .62rem;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.5;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+.queryHistoryItemContent span {
+
+    color:
+        var(--grey);
+
+    font-size:
+        .50rem;
+
+    font-weight:
+        300;
+
+    opacity:
+        .45;
+
+}

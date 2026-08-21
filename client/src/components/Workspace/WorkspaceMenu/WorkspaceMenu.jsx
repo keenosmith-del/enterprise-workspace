@@ -11,6 +11,8 @@ import {
     Pencil,
     Trash2,
     LogOut,
+    Timeline,
+    Hammer,
 } from "lucide-react";
 
 import background from "../../../assets/background.png";
@@ -37,6 +39,7 @@ function WorkspaceMenu({
     dashboardMode = false,
     schemaMode = false,
     queryMode = false,
+    queryBuilderMode = false,
 
 }) {
 
@@ -154,6 +157,52 @@ function WorkspaceMenu({
 
                 </button>
 
+                {/* history */}
+                <button
+                    className={`
+        workspaceNavigationItem
+        ${currentPage === "queryHistory" ? "active" : ""}
+    `}
+                    onClick={() =>
+                        setCurrentPage("queryHistory")
+                    }
+                >
+
+                    <Timeline
+                        size={16}
+                        strokeWidth={1}
+                    />
+
+                    <span>
+                        Query History
+                    </span>
+
+                </button>
+
+                {/* query builder */}
+                <button
+                    className={`
+        workspaceNavigationItem
+        ${currentPage === "queryBuilder"
+                            ? "active"
+                            : ""}
+    `}
+                    onClick={() =>
+                        setCurrentPage("queryBuilder")
+                    }
+                >
+
+                    <Hammer
+                        size={16}
+                        strokeWidth={1}
+                    />
+
+                    <span>
+                        Query Builder
+                    </span>
+
+                </button>
+
                 {/* relationships */}
                 <button
                     className={`
@@ -181,7 +230,9 @@ function WorkspaceMenu({
             {!dashboardMode &&
                 !schemaMode &&
                 !queryMode &&
-                currentPage !== "relationships" && (
+                !queryBuilderMode &&
+                currentPage !== "relationships" &&
+                currentPage !== "queryHistory" && (
 
                     <>
 

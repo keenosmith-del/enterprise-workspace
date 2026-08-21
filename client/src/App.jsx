@@ -26,6 +26,8 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Schema from "./pages/Schema/Schema";
 import Query from "./pages/Query/Query";
 import Relationships from "./pages/Relationships/Relationships";
+import QueryHistory from "./pages/QueryHistory/QueryHistory";
+import QueryBuilder from "./pages/QueryBuilder/QueryBuilder";
 
 function App() {
 
@@ -240,6 +242,32 @@ function App() {
                     customRecords={customRecords}
 
                     loadDatabase={loadDatabase}
+                />
+
+            )}
+
+            {currentPage === "queryHistory" && (
+
+                <QueryHistory
+                    setLoggedIn={handleLogout}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                />
+
+            )}
+
+            {currentPage === "queryBuilder" && (
+
+                <QueryBuilder
+                    setLoggedIn={handleLogout}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+
+                    products={products}
+                    categories={categories}
+                    suppliers={suppliers}
+                    customTables={customTables}
+
                 />
 
             )}

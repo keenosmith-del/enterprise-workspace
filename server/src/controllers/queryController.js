@@ -1,5 +1,61 @@
 import prisma from "../config/prisma.js";
 
+function serializeValue(value) {
+
+    if (typeof value === "bigint") {
+
+        return Number(value);
+
+    }
+
+    if (value instanceof Date) {
+
+        return value.toISOString();
+
+    }
+
+    if (
+        value &&
+        typeof value === "object" &&
+        typeof value.toNumber === "function"
+    ) {
+
+        return value.toNumber();
+
+    }
+
+    if (Array.isArray(value)) {
+
+        return value.map(
+            serializeValue
+        );
+
+    }
+
+    if (
+        value &&
+        typeof value === "object"
+    ) {
+
+        return Object.fromEntries(
+
+            Object.entries(value).map(
+                ([key, value]) => [
+
+                    key,
+                    serializeValue(value),
+
+                ]
+            )
+
+        );
+
+    }
+
+    return value;
+
+}
+
 
 export const executeQuery = async (req, res) => {
 
@@ -35,7 +91,9 @@ export const executeQuery = async (req, res) => {
 
         const rows =
             Array.isArray(result)
-                ? result
+                ? result.map(
+                    serializeValue
+                )
                 : [];
 
 
